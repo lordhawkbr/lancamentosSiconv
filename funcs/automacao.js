@@ -1,5 +1,6 @@
 const writeLog = require("../funcs/writeLog")
 const BANCOS_PAGAMENTO = require("../auxiliar/bancos")
+const CONVENIOS = require("../auxiliar/convenios")
 const path = require("path");
 const fs = require("fs");
 const { logName } = require("../funcs/main")
@@ -160,9 +161,7 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
     const ADMINISTRATIVO = item["ADMINISTRATIVO"] == "S" ? "1" : "0"
     const [PROVENTOS, DESCONTOS, VALOR_LIQUIDO] = calcularValores(item)
     const SALARIO = item.TiposVerba.Provento.find(e => e["Descricao Verba"] == "SALARIO")["Vlr. Lancam."]
-    const CHECKBOX_META = "9080609"
-    const CHECKBOX_SERVICO = "15842918"
-    const CHECKBOX_TRIBUTO = ""
+    const [CHECKBOX_META, CHECKBOX_SERVICO, CHECKBOX_TRIBUTO] = CONVENIOS.find(e => e.convenio == item["CONVENIO"]).boxes
 
     try {
         if (countLines == 1) {
@@ -191,7 +190,8 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                 await page.click("input[value='Incluir Documento de Liquidação']")
             ])
         }
-        if (/*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || */!anexo && item["CPF"].length == 11) {
+        /*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || !anexo &&*/ 
+        if (item["CPF"].length == 11) {
             try {
                 await page.waitForSelector("#incluirDadosDocumentoTipoDocumentoContabil", { visible: true })
                 await page.select("#incluirDadosDocumentoTipoDocumentoContabil", "22")
