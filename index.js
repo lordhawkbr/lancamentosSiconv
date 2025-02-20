@@ -204,7 +204,7 @@ const startDebug = async () => {
 
 const iniciarManual = async (opcao) => {
     try {
-        const [holeritesExist, totalHolerites] = await verifyHoleritesExist();
+        // const [holeritesExist, totalHolerites] = await verifyHoleritesExist();
         const [txtExist, files] = await verifyTxtExist();
         const opcoesComAnexo = [2].includes(opcao)
 
