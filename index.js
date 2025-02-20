@@ -132,7 +132,7 @@ const parseToJson = (csvFilePath) => {
 
 const automacaoViaArquivo = async (filePath, opcao) => {
     let anexo = [2].includes(opcao);
-    let index = 0;
+    let index = 1;
     const fileData = parseToJson(filePath);
 
     // Validação inicial de fileData
@@ -150,10 +150,10 @@ const automacaoViaArquivo = async (filePath, opcao) => {
             switch (opcao) {
                 case 1:
                 case 2:
-                    leituraItem = await incluirDocLiquidacao(item, DESCRICAO_ITEM, index, page, anexo, holeritesPath);
+                    leituraItem = await incluirDocLiquidacao(item, DESCRICAO_ITEM, index, page, anexo, holeritesPath, fileData.length);
                     break;
                 case 3:
-                    leituraItem = await pagamentoOBTV(item, DESCRICAO_ITEM, index, page);
+                    leituraItem = await pagamentoOBTV(item, DESCRICAO_ITEM, index, page, fileData.length);
                     break;
                 default:
                     console.error("Opção inválida:", opcao);
@@ -166,7 +166,7 @@ const automacaoViaArquivo = async (filePath, opcao) => {
 
             if (leituraItem) {
                 var texto = [1, 2].includes(opcao) ? "documento incluido com sucesso!" : "pagamento OBTV realizado!"
-                writeLog(arquivo, `${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`);
+                writeLog(arquivo, `${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`);
                 console.log(`${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`)
             }
             if (index === fileData.length - 1) {

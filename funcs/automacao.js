@@ -156,7 +156,7 @@ const obterAliquota = (tipoVerba, SALARIO) => {
     return aliquota;
 };
 
-const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anexo, anexoPath) => {
+const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anexo, anexoPath, totalItens) => {
     const ADMINISTRATIVO = item["ADMINISTRATIVO"] == "S" ? "1" : "0"
     const [PROVENTOS, DESCONTOS, VALOR_LIQUIDO] = calcularValores(item)
     const SALARIO = item.TiposVerba.Provento.find(e => e["Descricao Verba"] == "SALARIO")["Vlr. Lancam."]
@@ -165,7 +165,7 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
     const CHECKBOX_TRIBUTO = ""
 
     try {
-        if (countLines == 0) {
+        if (countLines == 1) {
             await Promise.all([
                 await page.goto(process.env.HOSTINICIO),
                 await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
@@ -312,20 +312,20 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                 });
 
                 if (hasError) {
-                    writeLog(logName, `${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
-                    console.log(`${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
+                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
+                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
                     return false;
                 } else {
                     return true
                 }
             } catch (error) {
                 if (error.name === "TimeoutError") {
-                    writeLog(logName, `${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
-                    console.log(`${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
+                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
+                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
                     return false
                 } else {
-                    writeLog(logName, `${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
-                    console.log(`${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
+                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
+                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
                     return false
                 }
             }
