@@ -167,7 +167,7 @@ const automacaoViaArquivo = async (filePath, opcao) => {
             if (leituraItem) {
                 var texto = [1, 2].includes(opcao) ? "documento incluido com sucesso!" : "pagamento OBTV realizado!"
                 writeLog(arquivo, `${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`);
-                console.log(`${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`)
+                console.log(`${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`)
             }
             if (index === fileData.length - 1) {
                 console.log("Leitura finalizada!");
