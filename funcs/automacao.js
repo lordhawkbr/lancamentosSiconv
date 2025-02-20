@@ -2,6 +2,8 @@ const writeLog = require("../funcs/writeLog")
 const BANCOS_PAGAMENTO = require("../auxiliar/bancos")
 const path = require("path");
 const fs = require("fs");
+const { logName } = require("../funcs/main")
+
 
 const resetarJustificativa = async (fields) => {
     try {
@@ -47,10 +49,13 @@ const preencherDados = async (item, page, DESCRICAO_ITEM, VALOR_BRUTO) => {
     await page.waitForSelector("#salvarInTipoConta", { visible: true })
     await page.select("#salvarInTipoConta", "1")
     await page.waitForSelector("#salvarBanco", { visible: true })
-    // await page.type("#salvarBanco", codigosBancarios(item["BANCO"])[0].CODIGO)
-    await page.type("#salvarBanco", item["BANCO"])
+
+    const mapeamentoBancos = { "1": "001", "33": "003" };
+    let bancoTratado = mapeamentoBancos[item["BANCO"]] || item["BANCO"];
+
+    await page.type("#salvarBanco", bancoTratado)
     await page.waitForSelector("#salvarAgencia", { visible: true })
-    await page.type("#salvarAgencia", item["AGENCIA"])
+    await page.type("#salvarAgencia", item["AGENCIA"].includes("-") ? item["AGENCIA"].split("-")[0] : item["AGENCIA"])
     await page.waitForSelector("#salvarConta", { visible: true })
     await page.type("#salvarConta", item["CONTA"])
     await page.waitForSelector("#salvarDigitoConta", { visible: true })
@@ -72,7 +77,7 @@ const anexarHolerite = async (item, page, anexoPath, anexo, ref) => {
         await page.waitForSelector("#salvarJustificativa", { visible: true })
         const salvarJustificativa = await page.$("#salvarJustificativa");
         // await resetarJustificativa([salvarJustificativa])
-        await page.type("#salvarJustificativa", "Não foi digitalizado o contra-cheque devido à instabilidade e lentidão do portal que não permitiu a inclusão do arquivo. Para que não tenha maior atraso no pagamento os lançamentos serão realizados sem o devido anexo, sendo, posteriormente, anexados.")
+        await page.type("#salvarJustificativa", "O contra-cheque não foi digitalizado devido a instabilidades e lentidão no portal, impedindo o envio do arquivo. Para evitar atrasos no pagamento, os lançamentos serão feitos sem o anexo, que será incluído posteriormente.")
     }
 }
 
@@ -143,7 +148,7 @@ const obterAliquota = (tipoVerba, SALARIO) => {
             aliquota = "9,00";
         } else if (SALARIO > 2793.88 && SALARIO <= 4190.84) {
             aliquota = "12,00";
-        } else if (SALARIO > 4190.84 && SALARIO <= 8157.41) {
+        } else if (SALARIO > 4190.84 /*&& SALARIO <= 8157.41*/) {
             aliquota = "14,00";
         }
     }
@@ -151,10 +156,8 @@ const obterAliquota = (tipoVerba, SALARIO) => {
     return aliquota;
 };
 
-const incluirDocLiquidacao = async (item, countLines, page, anexo, anexoPath) => {
-    const ADMINISTRATIVO = item["ADMINISTRATIVO"] == "S" ? true : false
-    const [dd, mm, yyyy] = item["DtRef"].split("/")
-    const DESCRICAO_ITEM = `${mm}-${yyyy}-${item["Matricula"]}-${item["Roteiro"]}`
+const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anexo, anexoPath) => {
+    const ADMINISTRATIVO = item["ADMINISTRATIVO"] == "S" ? "1" : "0"
     const [PROVENTOS, DESCONTOS, VALOR_LIQUIDO] = calcularValores(item)
     const SALARIO = item.TiposVerba.Provento.find(e => e["Descricao Verba"] == "SALARIO")["Vlr. Lancam."]
     const CHECKBOX_META = "9080609"
@@ -188,12 +191,12 @@ const incluirDocLiquidacao = async (item, countLines, page, anexo, anexoPath) =>
                 await page.click("input[value='Incluir Documento de Liquidação']")
             ])
         }
-        if (anexo && await buscarHolerite(anexoPath, item["CPF"]) || !anexo && item["CPF"].length == 11) {
+        if (/*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || */!anexo && item["CPF"].length == 11) {
             try {
                 await page.waitForSelector("#incluirDadosDocumentoTipoDocumentoContabil", { visible: true })
                 await page.select("#incluirDadosDocumentoTipoDocumentoContabil", "22")
-                await page.waitForSelector(`[id=incluirDadosDocumentoDespesaAdministrativa][value="${ADMINISTRATIVO ? 1 : 0}"]`, { visible: true })
-                await page.click(`[id=incluirDadosDocumentoDespesaAdministrativa][value="${ADMINISTRATIVO ? 1 : 0}"]`)
+                await page.waitForSelector(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`, { visible: true })
+                await page.click(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`)
                 await page.waitForSelector("#form_submit", { visible: true })
                 await page.click("#form_submit")
                 await page.waitForNavigation()
@@ -213,6 +216,7 @@ const incluirDocLiquidacao = async (item, countLines, page, anexo, anexoPath) =>
                 await page.type("#incluirItemValorTotalItem", formatarNumero(PROVENTOS))
                 await page.waitForSelector("#incluirItemQuantidadeItem", { visible: true })
                 await page.type("#incluirItemQuantidadeItem", "1,00")
+
                 await page.waitForSelector(`input[value="${CHECKBOX_META}"]`, { visible: true })
                 await page.click(`input[value="${CHECKBOX_META}"]`)
                 await page.waitForSelector(`#incluirItemRecursosRepasse${CHECKBOX_META}`, { visible: true })
@@ -234,6 +238,7 @@ const incluirDocLiquidacao = async (item, countLines, page, anexo, anexoPath) =>
                     const fSALARIO = parseFloat(SALARIO.replace(",", "."))
                     const aliquotaVerba = obterAliquota(tipoVerba, fSALARIO)
                     const esferaTributo = ["IR", "INSS"].includes(tipoVerba) ? "FEDERAL" : "N.A"
+
                     if (tipoVerba == "IR" && fSALARIO > 2259.20 || tipoVerba == "INSS") {
                         await page.waitForSelector("#incluirTributoEsfera", { visible: true })
                         await page.select("#incluirTributoEsfera", esferaTributo)
@@ -277,13 +282,6 @@ const incluirDocLiquidacao = async (item, countLines, page, anexo, anexoPath) =>
                 await page.waitForSelector("input[value='Voltar']", { visible: true })
                 await page.click("input[value='Voltar']")
 
-                // await page.waitForSelector("#salvarCpfCredor", { visible: true })
-                // await page.type("#salvarCpfCredor", item["CPF"])
-
-                // await page.waitForSelector("#salvarValor", { visible: true })
-                // await page.click("#salvarValor")
-                // await page.type("#salvarValor", formatarNumero(PROVENTOS))
-
                 await preencherDados(item, page, DESCRICAO_ITEM, PROVENTOS)
 
                 await anexarHolerite(item, page, anexoPath, anexo, item["CPF"])
@@ -305,7 +303,7 @@ const incluirDocLiquidacao = async (item, countLines, page, anexo, anexoPath) =>
                 ])
 
                 await page.waitForSelector("input[value='Salvar Definitivo']", { visible: true })
-                await Promise.all([page.click("input[value='Salvar Definitivo']"), page.waitForNavigation({ waitUntil: "networkidle0" })]);
+                await Promise.all([page.click("input[value='Salvar Definitivo']"), page.waitForNavigation({ waitUntil: "networkidle2" })]);
 
                 const [hasError, errorMsg] = await page.evaluate(() => {
                     var errorDialog = document.querySelector("#popUpLayer2")
@@ -314,42 +312,37 @@ const incluirDocLiquidacao = async (item, countLines, page, anexo, anexoPath) =>
                 });
 
                 if (hasError) {
-                    writeLog("log", "geral", "txt", `${item["CPF"]}: erro ao incluir documento!`, errorMsg);
-                    item = []
+                    writeLog(logName, `${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
+                    console.log(`${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
                     return false;
                 } else {
-                    writeLog("log", "geral", "txt", `${item["CPF"]}: documento concluido!`)
-                    item = []
                     return true
                 }
             } catch (error) {
                 if (error.name === "TimeoutError") {
-                    writeLog("log", "geral", "txt", `${item["CPF"]}: esgotado tempo de execução do item!`)
-                    item = []
+                    writeLog(logName, `${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
+                    console.log(`${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
                     return false
                 } else {
-                    writeLog("log", "geral", "txt", `${item["CPF"]}: Falha ao ler o item!`)
-                    console.log(error)
-                    item = []
+                    writeLog(logName, `${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
+                    console.log(`${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
                     return false
                 }
             }
         } else {
-            writeLog("log", "geral", "txt", `${item["CPF"]}: condições para leitura do item não foram atendidas!(Anexo em falta e / ou CPF inválido)`)
-            item = []
+            writeLog(logName, `${DESCRICAO_ITEM}: condições para leitura do item não foram atendidas!(Anexo em falta e / ou CPF inválido)`)
             return false
         }
     } catch (error) {
-        console.log(error)
-        writeLog("log", "geral", "txt", `${item["CPF"]}: ${error} `);
-        item = []
+        console.log(`${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `)
+        writeLog(logName, `${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `);
         return false;
     }
 };
 
-const pagamentoOBTV = async (item, countLines, page) => {
-    const [dd, mm, yyyy] = item["DtRef"].split("/")
-    const DESCRICAO_ITEM = `${mm} -${yyyy} -${item["Matricula"]} -${item["Roteiro"]} `
+const escapeXPath = (value) => { return value.replace(/"/g, '\\"') }
+
+const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
     try {
         if (countLines === 0) {
             await page.goto(process.env.HOSTPGOBTV1, { waitUntil: "networkidle2" });
@@ -379,7 +372,8 @@ const pagamentoOBTV = async (item, countLines, page) => {
             ]);
         }
 
-        let [opcaoEncontrada] = await page.$x(`//option[contains(., "${item["Matricula"]}")]`);
+        // let [opcaoEncontrada] = await page.$x(`//option[contains(., "${item["Matricula"]}")]`);
+        let [opcaoEncontrada] = await page.$x(`//option[contains(., "${escapeXPath(item["Matricula"])}")]`);
         if (opcaoEncontrada) {
             let optValue = await (await opcaoEncontrada.getProperty("value")).jsonValue();
             await page.select(`#formEditarPagamentoOBTV\\:manterPagamentoOBTVControleNotaFiscalCombo`, optValue)
@@ -416,24 +410,30 @@ const pagamentoOBTV = async (item, countLines, page) => {
                 ])
 
                 await page.waitForSelector("input[value='Concluir Pagamento']", { visible: true })
-                await Promise.all([page.click("input[value='Concluir Pagamento']"), page.waitForNavigation({ waitUntil: "networkidle0", visible: true })]);
+                await Promise.all([page.click("input[value='Concluir Pagamento']"), page.waitForNavigation({ waitUntil: "networkidle2", visible: true })]);
 
-                const hasError = await page.evaluate(() => { return document.querySelector("#popUpLayer2") !== null; });
+                const [hasError, errorMsg] = await page.evaluate(() => {
+                    var errorDialog = document.querySelector("#popUpLayer2")
+                    var errorMsg = errorDialog?.querySelector(".error").innerHTML.replaceAll("&nbsp", " ")
+                    return [errorDialog !== null, errorMsg];
+                });
 
                 if (hasError) {
-                    writeLog("log", "geral", "txt", `${item["CPF"]}: erro durante o pagamento OBTV!`);
+                    writeLog(logName, `${DESCRICAO_ITEM}: erro ao relizar pagamento OBTV: ${errorMsg}`);
+                    console.log(`${DESCRICAO_ITEM}: erro ao relizar pagamento OBTV: ${errorMsg}`);
                     return false;
                 } else {
-                    writeLog("log", "geral", "txt", `${item["CPF"]}: pagamento OBTV liberado!`)
                     return true
                 }
             }
         } else {
-            writeLog("log", "geral", "txt", `${CPF} - ${IDENTIFICACAO_FUNCIONARIO}: Item não encontrado na seleção de pagamentos OBTV!`)
+            writeLog(logName, `${DESCRICAO_ITEM}: item não encontrado p/ seleção de pagamento OBTV!`)
+            console.log(`${DESCRICAO_ITEM}: item não encontrado p/ seleção de pagamento OBTV!`)
             return false
         }
     } catch (error) {
-        writeLog("log", "geral", "txt", `${CPF} - ${IDENTIFICACAO_FUNCIONARIO}: ${error}`);
+        console.log(`${DESCRICAO_ITEM}: erro ao iniciar pagamento OBTV: ${error} `)
+        writeLog(logName, `${DESCRICAO_ITEM}: erro ao iniciar pagamento OBTV: ${error} `);
         return false;
     }
 }

@@ -4,11 +4,7 @@
   "description": "Automações p/ lançamentos no sistema SICONV - Transfere GOV!",
   "main": "index.js",
   "scripts": {
-    "start": "start \"\" \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --remote-debugging-port=9202 --user-data-dir=\"C:\\Users\\%USERNAME%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\"",
-    "stop": "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :9202') do taskkill /PID %a /F",
-    "robo": "npm run start && node index.js",
-    "auto": "node --no-warnings auto.js",
-    "manual": "node --no-warnings manual.js"
+    "start": "node --no-warnings index.js"
   },
   "author": "Marllon Macedo - HMTJ",
   "license": "ISC",

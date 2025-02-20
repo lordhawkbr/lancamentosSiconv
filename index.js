@@ -12,6 +12,7 @@ const { spawn } = require("child_process");
 const { performance } = require("perf_hooks");
 
 let browser, page
+var arquivo = main.logName
 
 const holeritesPath = path.join(__dirname, "arquivos", "holerites")
 const txtPath = path.join(__dirname, "arquivos", "txt")
@@ -34,7 +35,7 @@ const resetFolder = async () => {
             fs.existsSync(path) ? fs.rmSync(path, { recursive: true, force: true }) : false
             fs.mkdirSync(path, { recursive: true })
         }
-        writeLog("log", "geral", "txt", `pasta holerites resetada!`)
+        writeLog(arquivo, `pasta holerites resetada!`)
         return true
     } catch (error) {
         console.log("resetFolder: ", error)
@@ -46,13 +47,13 @@ const verifyHoleritesExist = async () => {
     try {
         const totalFiles = fs.readdirSync(holeritesPath)
         if (fs.existsSync(holeritesPath) && totalFiles.length == 1) {
-            writeLog("log", "geral", "txt", `${totalFiles.length} Holerite unificado encontrado!`)
+            writeLog(arquivo, `${totalFiles.length} Holerite unificado encontrado!`)
             return [true, totalFiles.length]
         } else if (fs.existsSync(holeritesPath) && totalFiles.length > 1) {
-            writeLog("log", "geral", "txt", `${totalFiles.length} Holerites separados encontrados!`)
+            writeLog(arquivo, `${totalFiles.length} Holerites separados encontrados!`)
             return [true, totalFiles.length]
         } else {
-            writeLog("log", "geral", "txt", `Nenhum holerite encontrado - Total: ${totalFiles.length}!`)
+            writeLog(arquivo, `Nenhum holerite encontrado - Total: ${totalFiles.length}!`)
             console.log(`Nenhum holerite encontrado - Total: ${totalFiles.length}!`)
             return [false, false]
         }
@@ -69,25 +70,25 @@ const verifyTxtExist = async () => {
             const files = txtFiles.filter(file => [".txt", ".csv"].includes(path.extname(file).toLowerCase()));
 
             if (files.length > 0) {
-                writeLog("log", "geral", "txt", `${files.length} TXT encontrado!`);
+                writeLog(arquivo, `${files.length} TXT encontrado!`);
                 return [true, files];
             } else {
-                writeLog("log", "geral", "txt", `Nenhum arquivo TXT ou CSV encontrado!`);
+                writeLog(arquivo, `Nenhum arquivo TXT ou CSV encontrado!`);
                 console.log("Nenhum arquivo TXT ou CSV encontrado!");
                 return [false, []];
             }
         } else if (txtFiles.length > 1) {
-            writeLog("log", "geral", "txt", `Múltiplos arquivos TXT encontrados!`);
+            writeLog(arquivo, `Múltiplos arquivos TXT encontrados!`);
             console.log("Múltiplos arquivos TXT encontrados!");
             return [false, []];
         } else {
-            writeLog("log", "geral", "txt", `Nenhum arquivo TXT encontrado!`);
+            writeLog(arquivo, `Nenhum arquivo TXT encontrado!`);
             console.log("Nenhum arquivo TXT encontrado!");
             return [false, []];
         }
     } catch (error) {
         console.log("Não foi possível obter o arquivo TXT!", error);
-        writeLog("log", "geral", "txt", `Erro ao obter o arquivo TXT!`);
+        writeLog(arquivo, `Erro ao obter o arquivo TXT!`);
         return [false, []];
     }
 };
@@ -130,53 +131,56 @@ const parseToJson = (csvFilePath) => {
 };
 
 const automacaoViaArquivo = async (filePath, opcao) => {
-    let anexo = [2].includes(opcao)
-    let index = 0
-    const fileData = parseToJson(filePath)
+    let anexo = [2].includes(opcao);
+    let index = 0;
+    const fileData = parseToJson(filePath);
+
+    // Validação inicial de fileData
+    if (!Array.isArray(fileData) || fileData.length === 0) {
+        console.error("O arquivo fornecido está vazio ou inválido.");
+        return;
+    }
+
     for (var item of fileData) {
         const start = performance.now();
+        const [dd, mm, yyyy] = item["DtRef"].split("/")
+        const DESCRICAO_ITEM = `${mm}-${yyyy.substr(2)}-${item["Matricula"]}-${item["Roteiro"]}`
         try {
-            let leituraItem
+            let leituraItem;
             switch (opcao) {
                 case 1:
                 case 2:
-                    leituraItem = await incluirDocLiquidacao(item, index, page, anexo, holeritesPath)
+                    leituraItem = await incluirDocLiquidacao(item, DESCRICAO_ITEM, index, page, anexo, holeritesPath);
                     break;
-                case 9:
-                    leituraItem = await pagamentoOBTV(item, index, page)
+                case 3:
+                    leituraItem = await pagamentoOBTV(item, DESCRICAO_ITEM, index, page);
                     break;
                 default:
-                    break;
+                    console.error("Opção inválida:", opcao);
+                    await main.closeBrowser();
+                    return;
             }
+
             const end = performance.now();
-            const tempoTotal = Math.round((end - start) / 1000)
+            const tempoTotal = Math.round((end - start) / 1000);
+
             if (leituraItem) {
-                console.log(`CPF ${item["CPF"]} executado com sucesso! - Tempo total: ${tempoTotal} seg`)
-                writeLog("log", "geral", "txt", `CPF ${item["CPF"]} executado com sucesso! - Tempo total: ${tempoTotal} seg`)
-                item = []
-                // cb()
-            } else {
-                console.log(`Erro na leitura do CPF ${item["CPF"]}`)
-                writeLog("log", "geral", "txt", `Erro na leitura do CPF ${item["CPF"]}`)
-                item = []
-                // cb()
+                var texto = [1, 2].includes(opcao) ? "documento incluido com sucesso!" : "pagamento OBTV realizado!"
+                writeLog(arquivo, `${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`);
+                console.log(`${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`)
             }
             if (index === fileData.length - 1) {
-                console.log("Leitura finalizada!")
-                writeLog("log", "geral", "txt", `Leitura finalizada!`)
-                await main.closeBrowser()
-                // resolve()
+                console.log("Leitura finalizada!");
+                writeLog(arquivo, `Leitura finalizada!`);
+                await main.closeBrowser();
             }
             index++;
         } catch (error) {
-            console.log(error)
-            console.log(`Erro na leitura do arquivo TXT!`)
-            writeLog("log", "geral", "txt", `Erro na leitura do arquivo TXT!`)
-            await main.closeBrowser()
-            reject(error)
+            console.error("Erro durante a execução:", error);
+            writeLog(arquivo, `Erro na leitura do arquivo TXT: ${error.message}`);
         }
     }
-}
+};
 
 const startDebug = async () => {
     try {
@@ -187,7 +191,7 @@ const startDebug = async () => {
             page = browserOk.page
             return true
         } else {
-            writeLog("log", "geral", "txt", `Erro ao efetuar tentativa de login!`)
+            writeLog(arquivo, `Erro ao efetuar tentativa de login!`)
             console.log("Erro ao efetuar tentativa de login!")
             await main.closeBrowser()
             return false
@@ -204,21 +208,16 @@ const iniciarManual = async (opcao) => {
         const [txtExist, files] = await verifyTxtExist();
         const opcoesComAnexo = [2].includes(opcao)
 
-        if ((opcoesComAnexo && holeritesExist && txtExist) ||
-            (!opcoesComAnexo && txtExist)) {
+        if ((opcoesComAnexo && txtExist) || (!opcoesComAnexo && txtExist)) {
             const filePath = path.join(txtPath, files[0])
             opcoesComAnexo && totalHolerites == 1 ? await separarHolerites() : false
             if (await startDebug()) {
                 if (await main.acessarHome()) {
-                    writeLog("log", "geral", "txt", `Leitura iniciada!`)
+                    writeLog(arquivo, `Leitura iniciada!`)
                     console.log(`Leitura iniciada na opção: ${opcao}!`)
                     await automacaoViaArquivo(filePath, opcao)
                 }
-            } else {
-                console.log("Cancelado")
             }
-        } else {
-            console.log("Cancelado")
         }
     } catch (error) {
         console.log("Erro ao ler o diretório: ", error)
@@ -235,7 +234,9 @@ const start = async () => {
 
     rl.question("Digite a opção p/ iniciar: ", async (op) => {
         let opcao = parseInt(op)
-        await iniciarManual(opcao)
+        if (opcao != 0) {
+            await iniciarManual(opcao)
+        }
         rl.close()
     })
 }
