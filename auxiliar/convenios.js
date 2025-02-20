@@ -8,3 +8,5 @@ var convenios = [
         boxes: ["9080375", "15843028", ""]
     },
 ]
+
+module.exports = convenios

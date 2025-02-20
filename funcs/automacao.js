@@ -163,181 +163,182 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
     const SALARIO = item.TiposVerba.Provento.find(e => e["Descricao Verba"] == "SALARIO")["Vlr. Lancam."]
     const [CHECKBOX_META, CHECKBOX_SERVICO, CHECKBOX_TRIBUTO] = CONVENIOS.find(e => e.convenio == item["CONVENIO"]).boxes
 
-    try {
-        if (countLines == 1) {
-            await Promise.all([
-                await page.goto(process.env.HOSTINICIO),
-                await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
-                await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`),
-                await page.waitForSelector("#form_submit", { visible: true }),
-                await page.click("#form_submit")
-            ])
-            await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true });
-            await page.click("#tbodyrow > tr > td > div > a");
-        } else {
-            await Promise.all([
-                await page.goto(process.env.HOSTRETORNO1),
-                await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
-                await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`),
-                await page.waitForSelector("#form_submit", { visible: true }),
-                await page.click("#form_submit")
-            ])
-            await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true });
-            await page.click("#tbodyrow > tr > td > div > a");
-            await Promise.all([
-                await page.goto(process.env.HOSTRETORNO2),
-                await page.waitForSelector("input[value='Incluir Documento de Liquidação']", { visible: true }),
-                await page.click("input[value='Incluir Documento de Liquidação']")
-            ])
-        }
-        /*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || !anexo &&*/ 
-        if (item["CPF"].length == 11) {
-            try {
-                await page.waitForSelector("#incluirDadosDocumentoTipoDocumentoContabil", { visible: true })
-                await page.select("#incluirDadosDocumentoTipoDocumentoContabil", "22")
-                await page.waitForSelector(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`, { visible: true })
-                await page.click(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`)
-                await page.waitForSelector("#form_submit", { visible: true })
-                await page.click("#form_submit")
-                await page.waitForNavigation()
+    console.log()
+    // try {
+    //     if (countLines == 1) {
+    //         await Promise.all([
+    //             await page.goto(process.env.HOSTINICIO),
+    //             await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
+    //             await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`),
+    //             await page.waitForSelector("#form_submit", { visible: true }),
+    //             await page.click("#form_submit")
+    //         ])
+    //         await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true });
+    //         await page.click("#tbodyrow > tr > td > div > a");
+    //     } else {
+    //         await Promise.all([
+    //             await page.goto(process.env.HOSTRETORNO1),
+    //             await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
+    //             await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`),
+    //             await page.waitForSelector("#form_submit", { visible: true }),
+    //             await page.click("#form_submit")
+    //         ])
+    //         await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true });
+    //         await page.click("#tbodyrow > tr > td > div > a");
+    //         await Promise.all([
+    //             await page.goto(process.env.HOSTRETORNO2),
+    //             await page.waitForSelector("input[value='Incluir Documento de Liquidação']", { visible: true }),
+    //             await page.click("input[value='Incluir Documento de Liquidação']")
+    //         ])
+    //     }
+    //     /*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || !anexo &&*/ 
+    //     if (item["CPF"].length == 11) {
+    //         try {
+    //             await page.waitForSelector("#incluirDadosDocumentoTipoDocumentoContabil", { visible: true })
+    //             await page.select("#incluirDadosDocumentoTipoDocumentoContabil", "22")
+    //             await page.waitForSelector(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`, { visible: true })
+    //             await page.click(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`)
+    //             await page.waitForSelector("#form_submit", { visible: true })
+    //             await page.click("#form_submit")
+    //             await page.waitForNavigation()
 
-                await page.waitForSelector("input[name='manterNotasFiscaisInserirDadosDaNotaFiscalPreencherDadosItensForm']", { visible: true })
-                await page.click("input[name='manterNotasFiscaisInserirDadosDaNotaFiscalPreencherDadosItensForm']")
+    //             await page.waitForSelector("input[name='manterNotasFiscaisInserirDadosDaNotaFiscalPreencherDadosItensForm']", { visible: true })
+    //             await page.click("input[name='manterNotasFiscaisInserirDadosDaNotaFiscalPreencherDadosItensForm']")
 
-                //ITEM SERVIÇO
-                await page.waitForSelector("#incluirItemNomeItem", { visible: true })
-                await page.type("#incluirItemNomeItem", DESCRICAO_ITEM)
-                await page.waitForSelector("#incluirItemDescricaoItem", { visible: true })
-                await page.type("#incluirItemDescricaoItem", DESCRICAO_ITEM)
-                await page.waitForSelector("#incluirItemCodUnidadeFornecimento", { visible: true })
-                await page.type("#incluirItemCodUnidadeFornecimento", "MÊS")
-                await page.waitForSelector("#incluirItemValorTotalItem", { visible: true })
-                await page.click("#incluirItemValorTotalItem")
-                await page.type("#incluirItemValorTotalItem", formatarNumero(PROVENTOS))
-                await page.waitForSelector("#incluirItemQuantidadeItem", { visible: true })
-                await page.type("#incluirItemQuantidadeItem", "1,00")
+    //             //ITEM SERVIÇO
+    //             await page.waitForSelector("#incluirItemNomeItem", { visible: true })
+    //             await page.type("#incluirItemNomeItem", DESCRICAO_ITEM)
+    //             await page.waitForSelector("#incluirItemDescricaoItem", { visible: true })
+    //             await page.type("#incluirItemDescricaoItem", DESCRICAO_ITEM)
+    //             await page.waitForSelector("#incluirItemCodUnidadeFornecimento", { visible: true })
+    //             await page.type("#incluirItemCodUnidadeFornecimento", "MÊS")
+    //             await page.waitForSelector("#incluirItemValorTotalItem", { visible: true })
+    //             await page.click("#incluirItemValorTotalItem")
+    //             await page.type("#incluirItemValorTotalItem", formatarNumero(PROVENTOS))
+    //             await page.waitForSelector("#incluirItemQuantidadeItem", { visible: true })
+    //             await page.type("#incluirItemQuantidadeItem", "1,00")
 
-                await page.waitForSelector(`input[value="${CHECKBOX_META}"]`, { visible: true })
-                await page.click(`input[value="${CHECKBOX_META}"]`)
-                await page.waitForSelector(`#incluirItemRecursosRepasse${CHECKBOX_META}`, { visible: true })
-                await page.type(`#incluirItemRecursosRepasse${CHECKBOX_META}`, formatarNumero(PROVENTOS))
-                await page.waitForSelector(`input[value="${CHECKBOX_SERVICO}"]`, { visible: true })
-                await page.click(`input[value="${CHECKBOX_SERVICO}"]`)
-                await page.waitForSelector(`#form_submit`, { visible: true })
-                await page.click("#form_submit");
+    //             await page.waitForSelector(`input[value="${CHECKBOX_META}"]`, { visible: true })
+    //             await page.click(`input[value="${CHECKBOX_META}"]`)
+    //             await page.waitForSelector(`#incluirItemRecursosRepasse${CHECKBOX_META}`, { visible: true })
+    //             await page.type(`#incluirItemRecursosRepasse${CHECKBOX_META}`, formatarNumero(PROVENTOS))
+    //             await page.waitForSelector(`input[value="${CHECKBOX_SERVICO}"]`, { visible: true })
+    //             await page.click(`input[value="${CHECKBOX_SERVICO}"]`)
+    //             await page.waitForSelector(`#form_submit`, { visible: true })
+    //             await page.click("#form_submit");
 
-                await page.waitForSelector("input[value='Voltar']", { visible: true })
-                await page.click("input[value='Voltar']");
+    //             await page.waitForSelector("input[value='Voltar']", { visible: true })
+    //             await page.click("input[value='Voltar']");
 
-                await page.waitForSelector("input[value='Informar Tributos / Contribuições']", { visible: true })
-                await page.click("input[value='Informar Tributos / Contribuições']");
+    //             await page.waitForSelector("input[value='Informar Tributos / Contribuições']", { visible: true })
+    //             await page.click("input[value='Informar Tributos / Contribuições']");
 
-                for (const itemD of item.TiposVerba.Desconto) {
-                    const tipoVerba = itemD["Descricao Verba"]
-                    const valorVerba = itemD["Vlr. Lancam."]
-                    const fSALARIO = parseFloat(SALARIO.replace(",", "."))
-                    const aliquotaVerba = obterAliquota(tipoVerba, fSALARIO)
-                    const esferaTributo = ["IR", "INSS"].includes(tipoVerba) ? "FEDERAL" : "N.A"
+    //             for (const itemD of item.TiposVerba.Desconto) {
+    //                 const tipoVerba = itemD["Descricao Verba"]
+    //                 const valorVerba = itemD["Vlr. Lancam."]
+    //                 const fSALARIO = parseFloat(SALARIO.replace(",", "."))
+    //                 const aliquotaVerba = obterAliquota(tipoVerba, fSALARIO)
+    //                 const esferaTributo = ["IR", "INSS"].includes(tipoVerba) ? "FEDERAL" : "N.A"
 
-                    if (tipoVerba == "IR" && fSALARIO > 2259.20 || tipoVerba == "INSS") {
-                        await page.waitForSelector("#incluirTributoEsfera", { visible: true })
-                        await page.select("#incluirTributoEsfera", esferaTributo)
-                        await page.waitForSelector("#incluirTributoTipoFederal", { visible: true })
-                        await page.select("#incluirTributoTipoFederal", tipoVerba)
-                        await page.waitForSelector("#incluirTributoAliquota", { visible: true })
-                        await page.type("#incluirTributoAliquota", aliquotaVerba)
-                        await page.waitForSelector("#incluirTributoValor", { visible: true })
-                        await page.type("#incluirTributoValor", formatarNumero(valorVerba))
-                        await page.waitForSelector("#incluirTributoData", { visible: true })
-                        await page.type("#incluirTributoData", item["DtRef"])
-                        await page.waitForSelector("#incluirTributoDocumento", { visible: true })
-                        await page.type("#incluirTributoDocumento", DESCRICAO_ITEM)
-                        await page.waitForSelector("input[value='Incluir Tributo']", { visible: true })
-                        await page.click("input[value='Incluir Tributo']");
-                    }
-                }
+    //                 if (tipoVerba == "IR" && fSALARIO > 2259.20 || tipoVerba == "INSS") {
+    //                     await page.waitForSelector("#incluirTributoEsfera", { visible: true })
+    //                     await page.select("#incluirTributoEsfera", esferaTributo)
+    //                     await page.waitForSelector("#incluirTributoTipoFederal", { visible: true })
+    //                     await page.select("#incluirTributoTipoFederal", tipoVerba)
+    //                     await page.waitForSelector("#incluirTributoAliquota", { visible: true })
+    //                     await page.type("#incluirTributoAliquota", aliquotaVerba)
+    //                     await page.waitForSelector("#incluirTributoValor", { visible: true })
+    //                     await page.type("#incluirTributoValor", formatarNumero(valorVerba))
+    //                     await page.waitForSelector("#incluirTributoData", { visible: true })
+    //                     await page.type("#incluirTributoData", item["DtRef"])
+    //                     await page.waitForSelector("#incluirTributoDocumento", { visible: true })
+    //                     await page.type("#incluirTributoDocumento", DESCRICAO_ITEM)
+    //                     await page.waitForSelector("input[value='Incluir Tributo']", { visible: true })
+    //                     await page.click("input[value='Incluir Tributo']");
+    //                 }
+    //             }
 
-                // if (parseFloat(PENSAO_ALIMENTICIA.replace(",", ".")) > 0) {
-                //     await page.waitForSelector("input[value='Contribuicao']", { visible: true })
-                //     await page.click("input[value='Contribuicao']")
-                //     await page.waitForSelector("#incluirContribuicaoDenominacao", { visible: true })
-                //     await page.select("#incluirContribuicaoDenominacao", "Pensão Alimentícia")
-                //     await page.waitForSelector("#incluirContribuicaoValorCont", { visible: true })
-                //     await page.type("#incluirContribuicaoValorCont", PENSAO_ALIMENTICIA)
-                //     await page.waitForSelector("input[value='Incluir Contribuição']", { visible: true })
-                //     await page.click("input[value='Incluir Contribuição']")
-                // }
+    //             // if (parseFloat(PENSAO_ALIMENTICIA.replace(",", ".")) > 0) {
+    //             //     await page.waitForSelector("input[value='Contribuicao']", { visible: true })
+    //             //     await page.click("input[value='Contribuicao']")
+    //             //     await page.waitForSelector("#incluirContribuicaoDenominacao", { visible: true })
+    //             //     await page.select("#incluirContribuicaoDenominacao", "Pensão Alimentícia")
+    //             //     await page.waitForSelector("#incluirContribuicaoValorCont", { visible: true })
+    //             //     await page.type("#incluirContribuicaoValorCont", PENSAO_ALIMENTICIA)
+    //             //     await page.waitForSelector("input[value='Incluir Contribuição']", { visible: true })
+    //             //     await page.click("input[value='Incluir Contribuição']")
+    //             // }
 
-                // if (parseFloat(SINDICATO.replace(",", ".")) > 0) {
-                //     await page.waitForSelector("input[value='Contribuicao']", { visible: true })
-                //     await page.click("input[value='Contribuicao']")
-                //     await page.waitForSelector("#incluirContribuicaoDenominacao", { visible: true })
-                //     await page.select("#incluirContribuicaoDenominacao", "Contribuição Sindical")
-                //     await page.waitForSelector('#incluirContribuicaoValorCont')
-                //     await page.type('#incluirContribuicaoValorCont', SINDICATO)
-                //     await page.waitForSelector("input[value='Incluir Contribuição']", { visible: true })
-                //     await page.click("input[value='Incluir Contribuição']")
-                // }
+    //             // if (parseFloat(SINDICATO.replace(",", ".")) > 0) {
+    //             //     await page.waitForSelector("input[value='Contribuicao']", { visible: true })
+    //             //     await page.click("input[value='Contribuicao']")
+    //             //     await page.waitForSelector("#incluirContribuicaoDenominacao", { visible: true })
+    //             //     await page.select("#incluirContribuicaoDenominacao", "Contribuição Sindical")
+    //             //     await page.waitForSelector('#incluirContribuicaoValorCont')
+    //             //     await page.type('#incluirContribuicaoValorCont', SINDICATO)
+    //             //     await page.waitForSelector("input[value='Incluir Contribuição']", { visible: true })
+    //             //     await page.click("input[value='Incluir Contribuição']")
+    //             // }
 
-                await page.waitForSelector("input[value='Voltar']", { visible: true })
-                await page.click("input[value='Voltar']")
+    //             await page.waitForSelector("input[value='Voltar']", { visible: true })
+    //             await page.click("input[value='Voltar']")
 
-                await preencherDados(item, page, DESCRICAO_ITEM, PROVENTOS)
+    //             await preencherDados(item, page, DESCRICAO_ITEM, PROVENTOS)
 
-                await anexarHolerite(item, page, anexoPath, anexo, item["CPF"])
+    //             await anexarHolerite(item, page, anexoPath, anexo, item["CPF"])
 
-                await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
-                await page.select("#salvarTipoPagamantoOBTV", "1")
+    //             await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
+    //             await page.select("#salvarTipoPagamantoOBTV", "1")
 
-                // await new Promise(resolve => setTimeout(resolve, 100000000));
+    //             // await new Promise(resolve => setTimeout(resolve, 100000000));
 
-                let isDialogHandled = false;
+    //             let isDialogHandled = false;
 
-                await Promise.all([
-                    await page.on("dialog", async dialog => {
-                        if (!isDialogHandled) {
-                            isDialogHandled = true;
-                            await dialog.accept();
-                        }
-                    })
-                ])
+    //             await Promise.all([
+    //                 await page.on("dialog", async dialog => {
+    //                     if (!isDialogHandled) {
+    //                         isDialogHandled = true;
+    //                         await dialog.accept();
+    //                     }
+    //                 })
+    //             ])
 
-                await page.waitForSelector("input[value='Salvar Definitivo']", { visible: true })
-                await Promise.all([page.click("input[value='Salvar Definitivo']"), page.waitForNavigation({ waitUntil: "networkidle2" })]);
+    //             await page.waitForSelector("input[value='Salvar Definitivo']", { visible: true })
+    //             await Promise.all([page.click("input[value='Salvar Definitivo']"), page.waitForNavigation({ waitUntil: "networkidle2" })]);
 
-                const [hasError, errorMsg] = await page.evaluate(() => {
-                    var errorDialog = document.querySelector("#popUpLayer2")
-                    var errorMsg = errorDialog?.querySelector(".error").innerHTML.replaceAll("&nbsp", " ")
-                    return [errorDialog !== null, errorMsg];
-                });
+    //             const [hasError, errorMsg] = await page.evaluate(() => {
+    //                 var errorDialog = document.querySelector("#popUpLayer2")
+    //                 var errorMsg = errorDialog?.querySelector(".error").innerHTML.replaceAll("&nbsp", " ")
+    //                 return [errorDialog !== null, errorMsg];
+    //             });
 
-                if (hasError) {
-                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
-                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
-                    return false;
-                } else {
-                    return true
-                }
-            } catch (error) {
-                if (error.name === "TimeoutError") {
-                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
-                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
-                    return false
-                } else {
-                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
-                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
-                    return false
-                }
-            }
-        } else {
-            writeLog(logName, `${DESCRICAO_ITEM}: condições para leitura do item não foram atendidas!(Anexo em falta e / ou CPF inválido)`)
-            return false
-        }
-    } catch (error) {
-        console.log(`${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `)
-        writeLog(logName, `${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `);
-        return false;
-    }
+    //             if (hasError) {
+    //                 writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
+    //                 console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
+    //                 return false;
+    //             } else {
+    //                 return true
+    //             }
+    //         } catch (error) {
+    //             if (error.name === "TimeoutError") {
+    //                 writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
+    //                 console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
+    //                 return false
+    //             } else {
+    //                 writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
+    //                 console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
+    //                 return false
+    //             }
+    //         }
+    //     } else {
+    //         writeLog(logName, `${DESCRICAO_ITEM}: condições para leitura do item não foram atendidas!(Anexo em falta e / ou CPF inválido)`)
+    //         return false
+    //     }
+    // } catch (error) {
+    //     console.log(`${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `)
+    //     writeLog(logName, `${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `);
+    //     return false;
+    // }
 };
 
 const escapeXPath = (value) => { return value.replace(/"/g, '\\"') }
