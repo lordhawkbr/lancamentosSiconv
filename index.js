@@ -142,46 +142,45 @@ const automacaoViaArquivo = async (filePath, opcao) => {
     }
 
 
-    console.log(fileData[0])
-    // for (var item of fileData) {
-    //     const start = performance.now();
-    //     const [dd, mm, yyyy] = item["DtRef"].split("/")
-    //     const DESCRICAO_ITEM = `${mm}-${yyyy.substr(2)}-${item["Matricula"]}-${item["Roteiro"]}`
-    //     try {
-    //         let leituraItem;
-    //         switch (opcao) {
-    //             case 1:
-    //             case 2:
-    //                 leituraItem = await incluirDocLiquidacao(item, DESCRICAO_ITEM, index, page, anexo, holeritesPath, fileData.length);
-    //                 break;
-    //             case 3:
-    //                 leituraItem = await pagamentoOBTV(item, DESCRICAO_ITEM, index, page, fileData.length);
-    //                 break;
-    //             default:
-    //                 console.error("Opção inválida:", opcao);
-    //                 await main.closeBrowser();
-    //                 return;
-    //         }
+    for (var item of fileData) {
+        const start = performance.now();
+        const [dd, mm, yyyy] = item["DtRef"].split("/")
+        const DESCRICAO_ITEM = `${mm}-${yyyy.substr(2)}-${item["Matricula"]}-${item["Roteiro"]}`
+        try {
+            let leituraItem;
+            switch (opcao) {
+                case 1:
+                case 2:
+                    leituraItem = await incluirDocLiquidacao(item, DESCRICAO_ITEM, index, page, anexo, holeritesPath, fileData.length);
+                    break;
+                case 3:
+                    leituraItem = await pagamentoOBTV(item, DESCRICAO_ITEM, index, page, fileData.length);
+                    break;
+                default:
+                    console.error("Opção inválida:", opcao);
+                    await main.closeBrowser();
+                    return;
+            }
 
-    //         const end = performance.now();
-    //         const tempoTotal = Math.round((end - start) / 1000);
+            const end = performance.now();
+            const tempoTotal = Math.round((end - start) / 1000);
 
-    //         if (leituraItem) {
-    //             var texto = [1, 2].includes(opcao) ? "documento incluido com sucesso!" : "pagamento OBTV realizado!"
-    //             writeLog(arquivo, `${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`);
-    //             console.log(`${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`)
-    //         }
-    //         if (index === fileData.length) {
-    //             console.log("Leitura finalizada!");
-    //             writeLog(arquivo, `Leitura finalizada!`);
-    //             await main.closeBrowser();
-    //         }
-    //         index++;
-    //     } catch (error) {
-    //         console.error("Erro durante a execução:", error);
-    //         writeLog(arquivo, `Erro na leitura do arquivo TXT: ${error.message}`);
-    //     }
-    // }
+            if (leituraItem) {
+                var texto = [1, 2].includes(opcao) ? "documento incluido com sucesso!" : "pagamento OBTV realizado!"
+                writeLog(arquivo, `${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`);
+                console.log(`${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`)
+            }
+            if (index === fileData.length) {
+                console.log("Leitura finalizada!");
+                writeLog(arquivo, `Leitura finalizada!`);
+                await main.closeBrowser();
+            }
+            index++;
+        } catch (error) {
+            console.error("Erro durante a execução:", error);
+            writeLog(arquivo, `Erro na leitura do arquivo TXT: ${error.message}`);
+        }
+    }
 };
 
 const startDebug = async () => {
