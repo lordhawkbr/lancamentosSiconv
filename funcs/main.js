@@ -86,7 +86,7 @@ const acessarHome = async () => {
         await page.waitForSelector("#form_submit_login", { visible: true })
         await page.click("#form_submit_login")
 
-        await delay(10000)
+        // await delay(10000)
         // if (await page.waitForSelector("#login-certificate", { visible: true })) {
         //     await page.waitForSelector("#login-certificate", { visible: true })
         //     await page.click("#login-certificate")
