@@ -169,7 +169,7 @@ const automacaoViaArquivo = async (filePath, opcao) => {
                 writeLog(arquivo, `${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`);
                 console.log(`${index}/${fileData.length} - ${DESCRICAO_ITEM}: ${texto} Tempo total: ${tempoTotal} seg`)
             }
-            if (index === fileData.length - 1) {
+            if (index === fileData.length) {
                 console.log("Leitura finalizada!");
                 writeLog(arquivo, `Leitura finalizada!`);
                 await main.closeBrowser();
