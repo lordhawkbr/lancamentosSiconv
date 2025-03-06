@@ -70,6 +70,8 @@ const preencherDados = async (item, page, DESCRICAO_ITEM, VALOR_BRUTO) => {
         await page.type("#salvarConta", `${dadosBanco.CONTA}`)
         await page.waitForSelector("#salvarDigitoConta", { visible: true })
         await page.type("#salvarDigitoConta", `${dadosBanco.DIGITO}`)
+        
+        return true
     } else {
         return false
     }

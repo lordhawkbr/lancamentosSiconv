@@ -4677,7 +4677,7 @@ const dadosBancarios = [
         "BANCO": 237,
         "AGENCIA": 3723,
         "CONTA": 1002581,
-        "DIGITO": 1
+        "DIGITO": 8
     },
     {
         "DSEI": "MEDIO RIO PURUS",
