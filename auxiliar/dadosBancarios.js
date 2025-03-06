@@ -147,13 +147,6 @@ const dadosBancarios = [
     "DIGITO": "7"
   },
   {
-    "CPF": "01024849295",
-    "BANCO": "001",
-    "AGENCIA": "2290",
-    "CONTA": "67091",
-    "DIGITO": "0"
-  },
-  {
     "CPF": "00484468235",
     "BANCO": "001",
     "AGENCIA": "4652",
@@ -194,20 +187,6 @@ const dadosBancarios = [
     "AGENCIA": "4652",
     "CONTA": "8225",
     "DIGITO": "2"
-  },
-  {
-    "CPF": "64425061268",
-    "BANCO": "001",
-    "AGENCIA": "2358",
-    "CONTA": "51098",
-    "DIGITO": "0"
-  },
-  {
-    "CPF": "92527213200",
-    "BANCO": "001",
-    "AGENCIA": "4652",
-    "CONTA": "5156",
-    "DIGITO": "0"
   },
   {
     "CPF": "52528456204",
@@ -8994,106 +8973,55 @@ const dadosBancarios = [
     "CONTA": "14722",
     "DIGITO": "2"
   },
-  [
-    {
-      "CPF": "01024849295",
-      "BANCO": "001",
-      "AGENCIA": "2290",
-      "CONTA": "67091",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "73915181234",
-      "BANCO": "001",
-      "AGENCIA": "4652",
-      "CONTA": "7277",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "64425061268",
-      "BANCO": "001",
-      "AGENCIA": "2358",
-      "CONTA": "51098",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "92527213200",
-      "BANCO": "001",
-      "AGENCIA": "4652",
-      "CONTA": "5156",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "79396348287",
-      "BANCO": "001",
-      "AGENCIA": "4652",
-      "CONTA": "6342",
-      "DIGITO": "8"
-    },
-    {
-      "CPF": "06340559255",
-      "BANCO": "237",
-      "AGENCIA": "0427",
-      "CONTA": "24747",
-      "DIGITO": "2"
-    },
-    {
-      "CPF": "02449922237",
-      "BANCO": "237",
-      "AGENCIA": "0427",
-      "CONTA": "623003",
-      "DIGITO": "2"
-    },
-    {
-      "CPF": "01024849295",
-      "BANCO": "001",
-      "AGENCIA": "2290",
-      "CONTA": "67091",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "73915181234",
-      "BANCO": "001",
-      "AGENCIA": "4652",
-      "CONTA": "7277",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "64425061268",
-      "BANCO": "001",
-      "AGENCIA": "2358",
-      "CONTA": "51098",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "92527213200",
-      "BANCO": "001",
-      "AGENCIA": "4652",
-      "CONTA": "5156",
-      "DIGITO": "X"
-    },
-    {
-      "CPF": "79396348287",
-      "BANCO": "001",
-      "AGENCIA": "4652",
-      "CONTA": "6342",
-      "DIGITO": "8"
-    },
-    {
-      "CPF": "06340559255",
-      "BANCO": "237",
-      "AGENCIA": "0427",
-      "CONTA": "24747",
-      "DIGITO": "2"
-    },
-    {
-      "CPF": "02449922237",
-      "BANCO": "237",
-      "AGENCIA": "0427",
-      "CONTA": "623003",
-      "DIGITO": "2"
-    }
-  ]
+  {
+    "CPF": "06340559255",
+    "BANCO": "237",
+    "AGENCIA": "0427",
+    "CONTA": "24747",
+    "DIGITO": "2"
+  },
+  {
+    "CPF": "01024849295",
+    "BANCO": "001",
+    "AGENCIA": "2290",
+    "CONTA": "67091",
+    "DIGITO": "X"
+  },
+  {
+    "CPF": "64425061268",
+    "BANCO": "001",
+    "AGENCIA": "2358",
+    "CONTA": "51098",
+    "DIGITO": "X"
+  },
+  {
+    "CPF": "92527213200",
+    "BANCO": "001",
+    "AGENCIA": "4652",
+    "CONTA": "5156",
+    "DIGITO": "X"
+  },
+  {
+    "CPF": "79396348287",
+    "BANCO": "001",
+    "AGENCIA": "4652",
+    "CONTA": "6342",
+    "DIGITO": "8"
+  },
+  {
+    "CPF": "06340559255",
+    "BANCO": "237",
+    "AGENCIA": "0427",
+    "CONTA": "24747",
+    "DIGITO": "2"
+  },
+  {
+    "CPF": "02449922237",
+    "BANCO": "237",
+    "AGENCIA": "0427",
+    "CONTA": "623003",
+    "DIGITO": "2"
+  }
 ]
 
 module.exports = dadosBancarios
