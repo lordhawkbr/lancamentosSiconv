@@ -71,8 +71,6 @@ const preencherDados = async (item, page, DESCRICAO_ITEM, VALOR_BRUTO) => {
         await page.waitForSelector("#salvarDigitoConta", { visible: true })
         await page.type("#salvarDigitoConta", `${dadosBanco.DIGITO}`)
     } else {
-        writeLog(logName, `Dados bancários não encontrados para o CPF: ${item["CPF"]}!`);
-        console.log(`Dados bancários não encontrados para o CPF: ${item["CPF"]}!`)
         return false
     }
 }
@@ -295,40 +293,45 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                 await page.waitForSelector("input[value='Voltar']", { visible: true })
                 await page.click("input[value='Voltar']")
 
-                await preencherDados(item, page, DESCRICAO_ITEM, PROVENTOS)
-                await anexarHolerite(item, page, anexoPath, anexo, item["CPF"])
+                if (await preencherDados(item, page, DESCRICAO_ITEM, PROVENTOS)) {
+                    await anexarHolerite(item, page, anexoPath, anexo, item["CPF"])
 
-                await new Promise(resolve => setTimeout(resolve, 100000000));
+                    // await new Promise(resolve => setTimeout(resolve, 100000000));
 
-                await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
-                await page.select("#salvarTipoPagamantoOBTV", "1")
+                    await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
+                    await page.select("#salvarTipoPagamantoOBTV", "1")
 
-                let isDialogHandled = false;
+                    let isDialogHandled = false;
 
-                await Promise.all([
-                    await page.on("dialog", async dialog => {
-                        if (!isDialogHandled) {
-                            isDialogHandled = true;
-                            await dialog.accept();
-                        }
-                    })
-                ])
+                    await Promise.all([
+                        await page.on("dialog", async dialog => {
+                            if (!isDialogHandled) {
+                                isDialogHandled = true;
+                                await dialog.accept();
+                            }
+                        })
+                    ])
 
-                await page.waitForSelector("input[value='Salvar Definitivo']", { visible: true })
-                await Promise.all([page.click("input[value='Salvar Definitivo']"), page.waitForNavigation({ waitUntil: "networkidle2" })]);
+                    await page.waitForSelector("input[value='Salvar Definitivo']", { visible: true })
+                    await Promise.all([page.click("input[value='Salvar Definitivo']"), page.waitForNavigation({ waitUntil: "networkidle2" })]);
 
-                const [hasError, errorMsg] = await page.evaluate(() => {
-                    var errorDialog = document.querySelector("#popUpLayer2")
-                    var errorMsg = errorDialog?.querySelector(".error").innerHTML.replaceAll("&nbsp", " ")
-                    return [errorDialog !== null, errorMsg];
-                });
+                    const [hasError, errorMsg] = await page.evaluate(() => {
+                        var errorDialog = document.querySelector("#popUpLayer2")
+                        var errorMsg = errorDialog?.querySelector(".error").innerHTML.replaceAll("&nbsp", " ")
+                        return [errorDialog !== null, errorMsg];
+                    });
 
-                if (hasError) {
-                    writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
-                    console.log(`${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
-                    return false;
+                    if (hasError) {
+                        writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
+                        console.log(`${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
+                        return false;
+                    } else {
+                        return true
+                    }
                 } else {
-                    return true
+                    writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: Dados bancários não encontrados para o CPF: ${item["CPF"]}!`);
+                    console.log(`${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: Dados bancários não encontrados para o CPF: ${item["CPF"]}!`)
+                    return false;
                 }
             } catch (error) {
                 if (error.name === "TimeoutError") {
