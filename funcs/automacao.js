@@ -27,7 +27,7 @@ const buscarHolerite = async (folderPath, fileName) => {
 }
 
 const buscarDadosBancarios = (CPF) => {
-    const index = dadosBancarios.findLastIndex(d => d.CPF == CPF)
+    const index = dadosBancarios.find(d => d.CPF == CPF)
     if (index != -1) {
         return dadosBancarios[index]
     } else {
