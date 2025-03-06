@@ -9095,3 +9095,5 @@ const dadosBancarios = [
     }
   ]
 ]
+
+module.exports = dadosBancarios
