@@ -27,7 +27,7 @@ const buscarHolerite = async (folderPath, fileName) => {
 }
 
 const buscarDadosBancarios = (CPF) => {
-    const index = dadosBancarios.findIndex(d => d.CPF == CPF)
+    const index = dadosBancarios.findLastIndex(d => d.CPF == CPF)
     if (index != -1) {
         return dadosBancarios[index]
     } else {
@@ -70,7 +70,7 @@ const preencherDados = async (item, page, DESCRICAO_ITEM, VALOR_BRUTO) => {
         await page.type("#salvarConta", `${dadosBanco.CONTA}`)
         await page.waitForSelector("#salvarDigitoConta", { visible: true })
         await page.type("#salvarDigitoConta", `${dadosBanco.DIGITO}`)
-        
+
         return true
     } else {
         return false
@@ -362,7 +362,13 @@ const escapeXPath = (value) => { return value.replace(/"/g, '\\"') }
 const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
     try {
         if (countLines === 0) {
-            await page.goto(process.env.HOSTPGOBTV1, { waitUntil: "networkidle2" });
+            // await page.goto(process.env.HOSTPGOBTV1, { waitUntil: "networkidle2" });
+            await Promise.all([
+                page.waitForSelector("#menuPrincipal > div.col1 > div.button.menu.menuSelecionado", { visible: true }),
+                page.click("#menuPrincipal > div.col1 > div.button.menu.menuSelecionado"),
+                page.waitForSelector("#contentMenu > div:nth-child(3) > ul > li:nth-child(6) > a", { visible: true }),
+                page.click("#contentMenu > div:nth-child(3) > ul > li:nth-child(6) > a")
+            ]);
             await page.waitForSelector("#consultarNumeroConvenio", { visible: true });
             await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`);
             await page.waitForSelector("#form_submit", { visible: true });
