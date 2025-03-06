@@ -1,6 +1,7 @@
 const writeLog = require("../funcs/writeLog")
 const BANCOS_PAGAMENTO = require("../auxiliar/bancos")
 const CONVENIOS = require("../auxiliar/convenios")
+const dadosBancarios = require("../auxiliar/dadosBancarios")
 const path = require("path");
 const fs = require("fs");
 const { logName } = require("../funcs/main")
@@ -25,42 +26,55 @@ const buscarHolerite = async (folderPath, fileName) => {
     }
 }
 
+const buscarDadosBancarios = (CPF) => {
+    const index = dadosBancarios.findIndex(d => d.CPF == CPF)
+    if (index != -1) {
+        return dadosBancarios[index]
+    } else {
+        return false
+    }
+}
+
 const preencherDados = async (item, page, DESCRICAO_ITEM, VALOR_BRUTO) => {
-    await page.waitForSelector("#salvarNumero", { visible: true })
-    await page.type("#salvarNumero", DESCRICAO_ITEM)
+    const dadosBanco = buscarDadosBancarios(item["CPF"])
+    if (dadosBanco) {
+        await page.waitForSelector("#salvarNumero", { visible: true })
+        await page.type("#salvarNumero", DESCRICAO_ITEM)
 
-    await page.waitForSelector("#salvarCpfCredor", { visible: true })
-    await page.type("#salvarCpfCredor", item["CPF"])
+        await page.waitForSelector("#salvarCpfCredor", { visible: true })
+        await page.type("#salvarCpfCredor", item["CPF"])
 
-    await page.waitForSelector("#salvarDataDeEmissao", { visible: true })
-    await page.type("#salvarDataDeEmissao", item["DtRef"])
+        await page.waitForSelector("#salvarDataDeEmissao", { visible: true })
+        await page.type("#salvarDataDeEmissao", item["DtRef"])
 
-    await page.waitForSelector("#salvarDataDeSaidaEntrada", { visible: true })
-    await page.type("#salvarDataDeSaidaEntrada", item["DtPag"])
+        await page.waitForSelector("#salvarDataDeSaidaEntrada", { visible: true })
+        await page.type("#salvarDataDeSaidaEntrada", item["DtPag"])
 
-    await page.waitForSelector("#salvarValor", { visible: true })
-    await page.click("#salvarValor")
-    await page.type("#salvarValor", formatarNumero(VALOR_BRUTO))
+        await page.waitForSelector("#salvarValor", { visible: true })
+        await page.click("#salvarValor")
+        await page.type("#salvarValor", formatarNumero(VALOR_BRUTO))
 
-    await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
-    await page.select("#salvarTipoPagamantoOBTV", "1")
+        await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
+        await page.select("#salvarTipoPagamantoOBTV", "1")
 
-    await page.evaluate(() => { carregaCamposPagamento("1") })
+        await page.evaluate(() => { carregaCamposPagamento("1") })
 
-    await page.waitForSelector("#salvarInTipoConta", { visible: true })
-    await page.select("#salvarInTipoConta", "1")
-    await page.waitForSelector("#salvarBanco", { visible: true })
+        await page.waitForSelector("#salvarInTipoConta", { visible: true })
+        await page.select("#salvarInTipoConta", "1")
+        await page.waitForSelector("#salvarBanco", { visible: true })
 
-    const mapeamentoBancos = { "1": "001", "33": "003" };
-    let bancoTratado = mapeamentoBancos[item["BANCO"]] || item["BANCO"];
-
-    await page.type("#salvarBanco", bancoTratado)
-    await page.waitForSelector("#salvarAgencia", { visible: true })
-    await page.type("#salvarAgencia", item["AGENCIA"].includes("-") ? item["AGENCIA"].split("-")[0] : item["AGENCIA"])
-    await page.waitForSelector("#salvarConta", { visible: true })
-    await page.type("#salvarConta", item["CONTA"])
-    await page.waitForSelector("#salvarDigitoConta", { visible: true })
-    await page.type("#salvarDigitoConta", item["DIGITO"])
+        await page.type("#salvarBanco", `${dadosBanco.BANCO}`)
+        await page.waitForSelector("#salvarAgencia", { visible: true })
+        await page.type("#salvarAgencia", `${dadosBanco.AGENCIA}`)
+        await page.waitForSelector("#salvarConta", { visible: true })
+        await page.type("#salvarConta", `${dadosBanco.CONTA}`)
+        await page.waitForSelector("#salvarDigitoConta", { visible: true })
+        await page.type("#salvarDigitoConta", `${dadosBanco.DIGITO}`)
+    } else {
+        writeLog(logName, `Dados bancários não encontrados para o CPF: ${item["CPF"]}!`);
+        console.log(`Dados bancários não encontrados para o CPF: ${item["CPF"]}!`)
+        return false
+    }
 }
 
 const anexarHolerite = async (item, page, anexoPath, anexo, ref) => {
@@ -77,7 +91,6 @@ const anexarHolerite = async (item, page, anexoPath, anexo, ref) => {
         await page.click("#tr-salvarNaoDigitalizar input[value='1']", { clickCount: 1 })
         await page.waitForSelector("#salvarJustificativa", { visible: true })
         const salvarJustificativa = await page.$("#salvarJustificativa");
-        // await resetarJustificativa([salvarJustificativa])
         await page.type("#salvarJustificativa", "O contra-cheque não foi digitalizado devido a instabilidades e lentidão no portal, impedindo o envio do arquivo. Para evitar atrasos no pagamento, os lançamentos serão feitos sem o anexo, que será incluído posteriormente.")
     }
 }
@@ -190,13 +203,13 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                 await page.click("input[value='Incluir Documento de Liquidação']")
             ])
         }
-        /*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || !anexo &&*/ 
+        /*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || !anexo &&*/
         if (item["CPF"].length == 11) {
             try {
                 await page.waitForSelector("#incluirDadosDocumentoTipoDocumentoContabil", { visible: true })
                 await page.select("#incluirDadosDocumentoTipoDocumentoContabil", "22")
-                await page.waitForSelector(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`, { visible: true })
-                await page.click(`[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`)
+                await page.waitForSelector(`[id = "incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`, { visible: true })
+                await page.click(`[id = "incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`)
                 await page.waitForSelector("#form_submit", { visible: true })
                 await page.click("#form_submit")
                 await page.waitForNavigation()
@@ -283,13 +296,12 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                 await page.click("input[value='Voltar']")
 
                 await preencherDados(item, page, DESCRICAO_ITEM, PROVENTOS)
-
                 await anexarHolerite(item, page, anexoPath, anexo, item["CPF"])
+
+                await new Promise(resolve => setTimeout(resolve, 100000000));
 
                 await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
                 await page.select("#salvarTipoPagamantoOBTV", "1")
-
-                // await new Promise(resolve => setTimeout(resolve, 100000000));
 
                 let isDialogHandled = false;
 
@@ -312,15 +324,15 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                 });
 
                 if (hasError) {
-                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
-                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
+                    writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
+                    console.log(`${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
                     return false;
                 } else {
                     return true
                 }
             } catch (error) {
                 if (error.name === "TimeoutError") {
-                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
+                    writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
                     console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
                     return false
                 } else {

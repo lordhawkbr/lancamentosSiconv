@@ -56,8 +56,9 @@ const startDebug = async () => {
                 "--ignore-certificate-errors",
                 "--use-fake-ui-for-media-stream",
                 "--disable-geolocation",
-                "--no-sandbox",
-                "--disable-setuid-sandbox"
+                "--disable-background-timer-throttling",
+                "--disable-backgrounding-occluded-windows",
+                "--disable-renderer-backgrounding"
             ],
             defaultViewport: null
         });
@@ -68,6 +69,7 @@ const startDebug = async () => {
         await page.setDefaultNavigationTimeout(process.env.TIMEOUT);
         await page.setDefaultTimeout(process.env.TIMEOUT);
         await page.setJavaScriptEnabled(true)
+        await page.bringToFront()
         status = true;
     } catch (error) {
         console.error("Erro ao iniciar o navegador ou conectar ao Puppeteer:", error.message);
