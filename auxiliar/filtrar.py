@@ -1,21 +1,23 @@
 import pandas as pd
 
-# Carregar o arquivo CSV original
-input_file = "Filtrado_Folha.csv"
-output_file = "new.csv"
+# Arquivos
+input_file = "ARQUIVO_TOTAL.csv"
+output_file = "ARQUIVO_PARCIAL.csv"
 
-# Lista de matrículas a serem excluídas
-matriculas_excluir = [
-    300001,300002,300004,300008,300010,300015,300017,300020,300023,300024,300025,300028,300030,300033,300034,300035,300036,300037,300038,300040,300041,300042,300044,300048,300050,300054,300058,300061,300064,300069,300070,300072,300075,300076,300077,300079,300080,300085,300087,300088,300093,300094,300095,300097,300098,300099,300100,300101,300102,300103,300104,300107,300110,300111,300113,300114,300116,300117,300118,300122,300124,300125,300126,300128,300130,300132,300141,300142,300143,300148,300153,300156,300157,300159,300161,300162,300164,300165,300172,300177,300178,300180,300185,300186,300189,300192,300195,300196,300198,300200,300201,300202,300203,300204,300205,300207,300209,300213,300214,300219,300222,300230,300233,300235,300236,300242,300247,300248,300249,300250,300251,300254,300255,300256,300258,300263,300267,300269,300272,300273,300274,300276,300277,300279,300280,300281,300285,300290,300293,300294,300297,300298,300299,300300,300301,300303,300305,300307,300312,300313,300314,300316,300322,300323,300325,300330,300331,300332
+# Lista de matrículas a remover
+matriculas = [
+    "300003","300018","300022","300043","300062","300066","300068","300071","300084","300108","300116","300145","300229","300241","300265"
 ]
 
-# Ler o arquivo CSV
-df = pd.read_csv(input_file, sep=";", encoding="utf-8")
+# Ler CSV ignorando linhas com erro de colunas
+df = pd.read_csv(input_file, sep=";", encoding="utf-8", dtype={"Matricula": str}, engine="python", on_bad_lines="skip")
 
-# Filtrar as linhas excluindo as matrículas especificadas
-df_filtrado = df[df["Matricula"].isin(matriculas_excluir)]
+# Filtrar removendo matrículas indesejadas
+# df_filtrado = df[~df["Matricula"].isin(matriculas)]
+#Filtrar e manter as matriculas desejadas
+df_filtrado = df[df["Matricula"].isin(matriculas)]
 
-# Salvar o resultado em um novo arquivo CSV
+# Salvar novo arquivo
 df_filtrado.to_csv(output_file, sep=";", index=False, encoding="utf-8")
 
 print(f"Arquivo filtrado salvo como: {output_file}")

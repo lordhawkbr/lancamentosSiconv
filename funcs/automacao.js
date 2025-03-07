@@ -173,7 +173,8 @@ const obterAliquota = (tipoVerba, SALARIO) => {
 const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anexo, anexoPath, totalItens) => {
     const ADMINISTRATIVO = item["ADMINISTRATIVO"] == "S" ? "1" : "0"
     const [PROVENTOS, DESCONTOS, VALOR_LIQUIDO] = calcularValores(item)
-    const SALARIO = item.TiposVerba.Provento.find(e => e["Descricao Verba"] == "SALARIO")["Vlr. Lancam."]
+    const SALARIO = item.TiposVerba.Provento.find(e => e["Descricao Verba"].includes("SALARIO"))["Vlr. Lancam."]
+
     const [CHECKBOX_META, CHECKBOX_SERVICO, CHECKBOX_TRIBUTO] = CONVENIOS.find(e => e.convenio == item["CONVENIO"]).boxes
 
     try {
@@ -324,8 +325,8 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                     });
 
                     if (hasError) {
-                        writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento: ${errorMsg}`);
-                        console.log(`${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: erro ao incluir documento!`, errorMsg);
+                        writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}-${item["CPF"]}: erro ao incluir documento: ${errorMsg}`);
+                        console.log(`${countLines} / ${totalItens} - ${DESCRICAO_ITEM}-${item["CPF"]}: erro ao incluir documento!`, errorMsg);
                         return false;
                     } else {
                         return true
@@ -337,22 +338,22 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                 }
             } catch (error) {
                 if (error.name === "TimeoutError") {
-                    writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
-                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: esgotado tempo de execução do item! - TimeoutError`)
+                    writeLog(logName, `${countLines} / ${totalItens} - ${DESCRICAO_ITEM}-${item["CPF"]}: esgotado tempo de execução do item! - TimeoutError`)
+                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}-${item["CPF"]}: esgotado tempo de execução do item! - TimeoutError`)
                     return false
                 } else {
-                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
-                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}: Falha ao ler o item! - ${error}`)
+                    writeLog(logName, `${countLines}/${totalItens} - ${DESCRICAO_ITEM}-${item["CPF"]}: Falha ao ler o item! - ${error}`)
+                    console.log(`${countLines}/${totalItens} - ${DESCRICAO_ITEM}-${item["CPF"]}: Falha ao ler o item! - ${error}`)
                     return false
                 }
             }
         } else {
-            writeLog(logName, `${DESCRICAO_ITEM}: condições para leitura do item não foram atendidas!(Anexo em falta e / ou CPF inválido)`)
+            writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: condições para leitura do item não foram atendidas!(Anexo em falta e / ou CPF inválido)`)
             return false
         }
     } catch (error) {
-        console.log(`${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `)
-        writeLog(logName, `${DESCRICAO_ITEM}: erro ao iniciar inclusão de documento: ${error} `);
+        console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar inclusão de documento: ${error} `)
+        writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar inclusão de documento: ${error} `);
         return false;
     }
 };
@@ -442,21 +443,21 @@ const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
                 });
 
                 if (hasError) {
-                    writeLog(logName, `${DESCRICAO_ITEM}: erro ao relizar pagamento OBTV: ${errorMsg}`);
-                    console.log(`${DESCRICAO_ITEM}: erro ao relizar pagamento OBTV: ${errorMsg}`);
+                    writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: erro ao relizar pagamento OBTV: ${errorMsg}`);
+                    console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: erro ao relizar pagamento OBTV: ${errorMsg}`);
                     return false;
                 } else {
                     return true
                 }
             }
         } else {
-            writeLog(logName, `${DESCRICAO_ITEM}: item não encontrado p/ seleção de pagamento OBTV!`)
-            console.log(`${DESCRICAO_ITEM}: item não encontrado p/ seleção de pagamento OBTV!`)
+            writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: item não encontrado p/ seleção de pagamento OBTV!`)
+            console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: item não encontrado p/ seleção de pagamento OBTV!`)
             return false
         }
     } catch (error) {
-        console.log(`${DESCRICAO_ITEM}: erro ao iniciar pagamento OBTV: ${error} `)
-        writeLog(logName, `${DESCRICAO_ITEM}: erro ao iniciar pagamento OBTV: ${error} `);
+        console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar pagamento OBTV: ${error} `)
+        writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar pagamento OBTV: ${error} `);
         return false;
     }
 }
