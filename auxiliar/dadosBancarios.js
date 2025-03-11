@@ -5036,7 +5036,7 @@ const dadosBancarios = [
     "CPF": "05223972201",
     "BANCO": "104",
     "AGENCIA": "3339",
-    "CONTA": "7494467689",
+    "CONTA": "749446768",
     "DIGITO": "9"
   },
   {
@@ -5587,7 +5587,7 @@ const dadosBancarios = [
   },
   {
     "CPF": "00851759270",
-    "BANCO": "001",
+    "BANCO": "234",
     "AGENCIA": "0234",
     "CONTA": "33452",
     "DIGITO": "9"
@@ -5937,7 +5937,7 @@ const dadosBancarios = [
   },
   {
     "CPF": "83095055234",
-    "BANCO": "001",
+    "BANCO": "234",
     "AGENCIA": "0234",
     "CONTA": "40635",
     "DIGITO": "X"
@@ -6357,7 +6357,7 @@ const dadosBancarios = [
   },
   {
     "CPF": "01426719248",
-    "BANCO": "001",
+    "BANCO": "234",
     "AGENCIA": "4519",
     "CONTA": "17733",
     "DIGITO": "4"
@@ -6646,7 +6646,7 @@ const dadosBancarios = [
     "CPF": "68606486272",
     "BANCO": "104",
     "AGENCIA": "0803",
-    "CONTA": "59629874",
+    "CONTA": "596298748",
     "DIGITO": "5"
   },
   {
