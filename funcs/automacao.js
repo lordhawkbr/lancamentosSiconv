@@ -6,17 +6,6 @@ const path = require("path");
 const fs = require("fs");
 const { logName } = require("../funcs/main")
 
-
-const resetarJustificativa = async (fields) => {
-    try {
-        for (const field of fields) {
-            await field.evaluate(el => el.value = "")
-        }
-    } catch (error) {
-        console.log(`Erro ao resetar valor dos campos: ${error}`)
-    }
-}
-
 const buscarHolerite = async (folderPath, fileName) => {
     const filePath = path.join(folderPath, `${fileName}.pdf`);
     if (fs.existsSync(filePath)) {
@@ -38,39 +27,20 @@ const buscarDadosBancarios = (CPF) => {
 const preencherDados = async (item, page, DESCRICAO_ITEM, VALOR_BRUTO) => {
     const dadosBanco = buscarDadosBancarios(item["CPF"])
     if (dadosBanco) {
-        await page.waitForSelector("#salvarNumero", { visible: true })
-        await page.type("#salvarNumero", DESCRICAO_ITEM)
-
-        await page.waitForSelector("#salvarCpfCredor", { visible: true })
-        await page.type("#salvarCpfCredor", item["CPF"])
-
-        await page.waitForSelector("#salvarDataDeEmissao", { visible: true })
-        await page.type("#salvarDataDeEmissao", item["DtRef"])
-
-        await page.waitForSelector("#salvarDataDeSaidaEntrada", { visible: true })
-        await page.type("#salvarDataDeSaidaEntrada", item["DtPag"])
-
-        await page.waitForSelector("#salvarValor", { visible: true })
-        await page.click("#salvarValor")
-        await page.type("#salvarValor", formatarNumero(VALOR_BRUTO))
-
-        await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
-        await page.select("#salvarTipoPagamantoOBTV", "1")
+        await preencherCampo(page, "type", "#salvarNumero", DESCRICAO_ITEM, false);
+        await preencherCampo(page, "type", "#salvarCpfCredor", item["CPF"], false);
+        await preencherCampo(page, "type", "#salvarDataDeEmissao", item["DtRef"], false);
+        await preencherCampo(page, "type", "#salvarDataDeSaidaEntrada", item["DtPag"], false);
+        await preencherCampo(page, "type", "#salvarValor", formatarNumero(VALOR_BRUTO), false);
+        await preencherCampo(page, "select", "#salvarTipoPagamantoOBTV", "1", false);
 
         await page.evaluate(() => { carregaCamposPagamento("1") })
 
-        await page.waitForSelector("#salvarInTipoConta", { visible: true })
-        await page.select("#salvarInTipoConta", "1")
-        await page.waitForSelector("#salvarBanco", { visible: true })
-
-        await page.type("#salvarBanco", `${dadosBanco.BANCO}`)
-        await page.waitForSelector("#salvarAgencia", { visible: true })
-        await page.type("#salvarAgencia", `${dadosBanco.AGENCIA}`)
-        await page.waitForSelector("#salvarConta", { visible: true })
-        await page.type("#salvarConta", `${dadosBanco.CONTA}`)
-        await page.waitForSelector("#salvarDigitoConta", { visible: true })
-        await page.type("#salvarDigitoConta", `${dadosBanco.DIGITO}`)
-
+        await preencherCampo(page, "select", "#salvarInTipoConta", "1", false);
+        await preencherCampo(page, "type", "#salvarBanco", dadosBanco.BANCO, false);
+        await preencherCampo(page, "type", "#salvarAgencia", dadosBanco.AGENCIA, false);
+        await preencherCampo(page, "type", "#salvarConta", dadosBanco.CONTA, false);
+        await preencherCampo(page, "type", "#salvarDigitoConta", dadosBanco.DIGITO, false);
         return true
     } else {
         return false
@@ -79,37 +49,17 @@ const preencherDados = async (item, page, DESCRICAO_ITEM, VALOR_BRUTO) => {
 
 const anexarHolerite = async (item, page, anexoPath, anexo, ref) => {
     if (anexo) {
-        await page.waitForSelector("#tr-salvarNaoDigitalizar input[value='0']", { visible: true });
-        await page.click("#tr-salvarNaoDigitalizar input[value='0']", { clickCount: 1 })
+        await clicarEAguardar(page, true, "#tr-salvarNaoDigitalizar input[value='0']");
         await page.waitForSelector("input[type='file']", { visible: true });
         const inputUploadHandle = await page.$("input[type='file']");
         await inputUploadHandle.uploadFile(`${anexoPath}\\${ref}.PDF`)
-        await page.waitForSelector(`#form_submit`, { visible: true })
-        await page.click("#form_submit");
+        await clicarEAguardar(page, true, "#form_submit");
     } else {
-        await page.waitForSelector("#tr-salvarNaoDigitalizar input[value='1']", { visible: true })
-        await page.click("#tr-salvarNaoDigitalizar input[value='1']", { clickCount: 1 })
-        await page.waitForSelector("#salvarJustificativa", { visible: true })
-        const salvarJustificativa = await page.$("#salvarJustificativa");
-        await page.type("#salvarJustificativa", "O contra-cheque não foi digitalizado devido a instabilidades e lentidão no portal, impedindo o envio do arquivo. Para evitar atrasos no pagamento, os lançamentos serão feitos sem o anexo, que será incluído posteriormente.")
+        await clicarEAguardar(page, true, "#tr-salvarNaoDigitalizar input[value='1']");
+        await page.$("#salvarJustificativa");
+        await preencherCampo(page, "type", "#salvarJustificativa", "O contra-cheque não foi digitalizado devido a instabilidades e lentidão no portal, impedindo o envio do arquivo. Para evitar atrasos no pagamento, os lançamentos serão feitos sem o anexo, que será incluído posteriormente.", false)
     }
 }
-
-const codigosBancarios = (banco) => {
-    const normalizeText = (text) => {
-        return text
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-zA-Z0-9\s]/g, "")
-            .trim()
-            .toLowerCase();
-    };
-    const normalizedSearch = normalizeText(banco);
-    return BANCOS_PAGAMENTO.filter(item => {
-        const normalizedBanco = normalizeText(item.BANCO);
-        return normalizedBanco.includes(normalizedSearch);
-    });
-};
 
 const formatarNumero = (valor) => {
     const numero = typeof valor === "string" ? parseFloat(valor.replace(",", ".")) : parseFloat(valor);
@@ -170,6 +120,21 @@ const obterAliquota = (tipoVerba, SALARIO) => {
     return aliquota;
 };
 
+const clicarEAguardar = async (page, wait, seletor) => {
+    await page.waitForSelector(seletor, { visible: true });
+    await Promise.all([
+        page.click(seletor),
+        wait ? page.waitForNavigation({ waitUntil: "networkidle2" }) : true
+    ]);
+}
+
+const preencherCampo = async (page, type, seletor, valor, timeout) => {
+    await page.waitForSelector(seletor, { visible: true });
+    await page.click(seletor);
+    type == "type" ? await page.type(seletor, valor, { delay: 1 }) : await page.select(seletor, valor)
+    timeout ? await page.waitForTimeout(1000) : true
+}
+
 const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anexo, anexoPath, totalItens) => {
     const ADMINISTRATIVO = item["ADMINISTRATIVO"] == "S" ? "1" : "0"
     const [PROVENTOS, DESCONTOS, VALOR_LIQUIDO] = calcularValores(item)
@@ -179,132 +144,65 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
 
     try {
         if (countLines == 1) {
-            await Promise.all([
-                await page.goto(process.env.HOSTINICIO),
-                await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
-                await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`),
-                await page.waitForSelector("#form_submit", { visible: true }),
-                await page.click("#form_submit")
-            ])
-            await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true });
-            await page.click("#tbodyrow > tr > td > div > a");
+            await page.goto(process.env.HOSTINICIO)
+            await preencherCampo(page, "type", "#consultarNumeroConvenio", item["CONVENIO"], false)
+            await clicarEAguardar(page, true, "#form_submit")
+            await clicarEAguardar(page, true, "#tbodyrow > tr > td > div > a")
         } else {
-            await Promise.all([
-                await page.goto(process.env.HOSTRETORNO1),
-                await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
-                await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`),
-                await page.waitForSelector("#form_submit", { visible: true }),
-                await page.click("#form_submit")
-            ])
-            await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true });
-            await page.click("#tbodyrow > tr > td > div > a");
-            await Promise.all([
-                await page.goto(process.env.HOSTRETORNO2),
-                await page.waitForSelector("input[value='Incluir Documento de Liquidação']", { visible: true }),
-                await page.click("input[value='Incluir Documento de Liquidação']")
-            ])
+            await page.goto(process.env.HOSTRETORNO1)
+            await preencherCampo(page, "type", "#consultarNumeroConvenio", item["CONVENIO"], false)
+            await clicarEAguardar(page, true, "#form_submit")
+            await clicarEAguardar(page, true, "#tbodyrow > tr > td > div > a")
+
+            await page.goto(process.env.HOSTRETORNO2)
+            
+            await clicarEAguardar(page, true, "input[value='Incluir Documento de Liquidação']")
         }
-        /*anexo && await buscarHolerite(anexoPath, item["CPF"]) && item["CPF"].length == 11 || !anexo &&*/
         if (item["CPF"].length == 11) {
             try {
-                await page.waitForSelector("#incluirDadosDocumentoTipoDocumentoContabil", { visible: true })
-                await page.select("#incluirDadosDocumentoTipoDocumentoContabil", "22")
-                await page.waitForSelector(`[id = "incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`, { visible: true })
-                await page.click(`[id = "incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`)
-                await page.waitForSelector("#form_submit", { visible: true })
-                await page.click("#form_submit")
-                await page.waitForNavigation()
-
-                await page.waitForSelector("input[name='manterNotasFiscaisInserirDadosDaNotaFiscalPreencherDadosItensForm']", { visible: true })
-                await page.click("input[name='manterNotasFiscaisInserirDadosDaNotaFiscalPreencherDadosItensForm']")
-
-                //ITEM SERVIÇO
-                await page.waitForSelector("#incluirItemNomeItem", { visible: true })
-                await page.type("#incluirItemNomeItem", DESCRICAO_ITEM)
-                await page.waitForSelector("#incluirItemDescricaoItem", { visible: true })
-                await page.type("#incluirItemDescricaoItem", DESCRICAO_ITEM)
-                await page.waitForSelector("#incluirItemCodUnidadeFornecimento", { visible: true })
-                await page.type("#incluirItemCodUnidadeFornecimento", "MÊS")
-                await page.waitForSelector("#incluirItemValorTotalItem", { visible: true })
-                await page.click("#incluirItemValorTotalItem")
-                await page.type("#incluirItemValorTotalItem", formatarNumero(PROVENTOS))
-                await page.waitForSelector("#incluirItemQuantidadeItem", { visible: true })
-                await page.type("#incluirItemQuantidadeItem", "1,00")
-
-                await page.waitForSelector(`input[value="${CHECKBOX_META}"]`, { visible: true })
-                await page.click(`input[value="${CHECKBOX_META}"]`)
-                await page.waitForSelector(`#incluirItemRecursosRepasse${CHECKBOX_META}`, { visible: true })
-                await page.type(`#incluirItemRecursosRepasse${CHECKBOX_META}`, formatarNumero(PROVENTOS))
-                await page.waitForSelector(`input[value="${CHECKBOX_SERVICO}"]`, { visible: true })
-                await page.click(`input[value="${CHECKBOX_SERVICO}"]`)
-                await page.waitForSelector(`#form_submit`, { visible: true })
-                await page.click("#form_submit");
-
-                await page.waitForSelector("input[value='Voltar']", { visible: true })
-                await page.click("input[value='Voltar']");
-
-                await page.waitForSelector("input[value='Informar Tributos / Contribuições']", { visible: true })
-                await page.click("input[value='Informar Tributos / Contribuições']");
+                await preencherCampo(page, "select", "#incluirDadosDocumentoTipoDocumentoContabil", "22", false)
+                await clicarEAguardar(page, false, `[id="incluirDadosDocumentoDespesaAdministrativa"][value="${ADMINISTRATIVO}"]`)
+                await clicarEAguardar(page, true, "#form_submit")
+                await clicarEAguardar(page, true, "input[name='manterNotasFiscaisInserirDadosDaNotaFiscalPreencherDadosItensForm']")
+                await preencherCampo(page, "type", "#incluirItemNomeItem", DESCRICAO_ITEM, false)
+                await preencherCampo(page, "type", "#incluirItemDescricaoItem", DESCRICAO_ITEM, false)
+                await preencherCampo(page, "type", "#incluirItemCodUnidadeFornecimento", "MÊS", false)
+                await preencherCampo(page, "type", "#incluirItemValorTotalItem", formatarNumero(PROVENTOS), false)
+                await preencherCampo(page, "type", "#incluirItemQuantidadeItem", "1,00", false)
+                await clicarEAguardar(page, false, `input[value="${CHECKBOX_META}"]`)
+                await preencherCampo(page, "type", `#incluirItemRecursosRepasse${CHECKBOX_META}`, formatarNumero(PROVENTOS), false);
+                await clicarEAguardar(page, false, `input[value="${CHECKBOX_SERVICO}"]`)
+                await clicarEAguardar(page, true, "input[value='Salvar e incluir novo item']");
+                await clicarEAguardar(page, true, "input[value='Voltar']");
+                await clicarEAguardar(page, true, "input[value='Informar Tributos / Contribuições']");
 
                 for (const itemD of item.TiposVerba.Desconto) {
-                    const tipoVerba = itemD["Descricao Verba"]
-                    const valorVerba = itemD["Vlr. Lancam."]
-                    const fSALARIO = parseFloat(SALARIO.replace(",", "."))
-                    const aliquotaVerba = obterAliquota(tipoVerba, fSALARIO)
-                    const esferaTributo = ["IR", "INSS"].includes(tipoVerba) ? "FEDERAL" : "N.A"
+                    const tipoVerba = itemD["Descricao Verba"];
+                    const valorVerba = itemD["Vlr. Lancam."];
+                    const fSALARIO = parseFloat(SALARIO.replace(",", "."));
+                    const aliquotaVerba = obterAliquota(tipoVerba, fSALARIO);
+                    const esferaTributo = ["IR", "INSS"].includes(tipoVerba) ? "FEDERAL" : "N.A";
 
-                    if (tipoVerba == "IR" && fSALARIO > 2259.20 || tipoVerba == "INSS") {
-                        await page.waitForSelector("#incluirTributoEsfera", { visible: true })
-                        await page.select("#incluirTributoEsfera", esferaTributo)
-                        await page.waitForSelector("#incluirTributoTipoFederal", { visible: true })
-                        await page.select("#incluirTributoTipoFederal", tipoVerba)
-                        await page.waitForSelector("#incluirTributoAliquota", { visible: true })
-                        await page.type("#incluirTributoAliquota", aliquotaVerba)
-                        await page.waitForSelector("#incluirTributoValor", { visible: true })
-                        await page.type("#incluirTributoValor", formatarNumero(valorVerba))
-                        await page.waitForSelector("#incluirTributoData", { visible: true })
-                        await page.type("#incluirTributoData", item["DtRef"])
-                        await page.waitForSelector("#incluirTributoDocumento", { visible: true })
-                        await page.type("#incluirTributoDocumento", DESCRICAO_ITEM)
-                        await page.waitForSelector("input[value='Incluir Tributo']", { visible: true })
-                        await page.click("input[value='Incluir Tributo']");
+                    if ((tipoVerba === "IR" && fSALARIO > 2259.20) || tipoVerba === "INSS") {
+                        await preencherCampo(page, "select", "#incluirTributoEsfera", esferaTributo, false);
+                        await preencherCampo(page, "select", "#incluirTributoTipoFederal", tipoVerba, false);
+                        await preencherCampo(page, "type", "#incluirTributoAliquota", aliquotaVerba, false);
+                        await preencherCampo(page, "type", "#incluirTributoValor", formatarNumero(valorVerba), false);
+                        await preencherCampo(page, "type", "#incluirTributoData", item["DtRef"], false);
+                        await preencherCampo(page, "type", "#incluirTributoDocumento", DESCRICAO_ITEM, false);
+                        await clicarEAguardar(page, true, "input[value='Incluir Tributo']");
                     }
                 }
 
-                // if (parseFloat(PENSAO_ALIMENTICIA.replace(",", ".")) > 0) {
-                //     await page.waitForSelector("input[value='Contribuicao']", { visible: true })
-                //     await page.click("input[value='Contribuicao']")
-                //     await page.waitForSelector("#incluirContribuicaoDenominacao", { visible: true })
-                //     await page.select("#incluirContribuicaoDenominacao", "Pensão Alimentícia")
-                //     await page.waitForSelector("#incluirContribuicaoValorCont", { visible: true })
-                //     await page.type("#incluirContribuicaoValorCont", PENSAO_ALIMENTICIA)
-                //     await page.waitForSelector("input[value='Incluir Contribuição']", { visible: true })
-                //     await page.click("input[value='Incluir Contribuição']")
-                // }
-
-                // if (parseFloat(SINDICATO.replace(",", ".")) > 0) {
-                //     await page.waitForSelector("input[value='Contribuicao']", { visible: true })
-                //     await page.click("input[value='Contribuicao']")
-                //     await page.waitForSelector("#incluirContribuicaoDenominacao", { visible: true })
-                //     await page.select("#incluirContribuicaoDenominacao", "Contribuição Sindical")
-                //     await page.waitForSelector('#incluirContribuicaoValorCont')
-                //     await page.type('#incluirContribuicaoValorCont', SINDICATO)
-                //     await page.waitForSelector("input[value='Incluir Contribuição']", { visible: true })
-                //     await page.click("input[value='Incluir Contribuição']")
-                // }
-
-                await page.waitForSelector("input[value='Voltar']", { visible: true })
-                await page.click("input[value='Voltar']")
+                await clicarEAguardar(page, true, "input[value='Voltar']");
 
                 if (await preencherDados(item, page, DESCRICAO_ITEM, PROVENTOS)) {
                     await anexarHolerite(item, page, anexoPath, anexo, item["CPF"])
-
-                    // await new Promise(resolve => setTimeout(resolve, 100000000));
-
-                    await page.waitForSelector("#salvarTipoPagamantoOBTV", { visible: true })
-                    await page.select("#salvarTipoPagamantoOBTV", "1")
+                    await preencherCampo(page, "select", "#salvarTipoPagamantoOBTV", "1", false);
 
                     let isDialogHandled = false;
+
+                    await new Promise(resolve => setTimeout(resolve, 10000000));
 
                     await Promise.all([
                         await page.on("dialog", async dialog => {
@@ -315,8 +213,7 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
                         })
                     ])
 
-                    await page.waitForSelector("input[value='Salvar Definitivo']", { visible: true })
-                    await Promise.all([page.click("input[value='Salvar Definitivo']"), page.waitForNavigation({ waitUntil: "networkidle2" })]);
+                    await clicarEAguardar(page, true, "input[value='Salvar Definitivo']");
 
                     const [hasError, errorMsg] = await page.evaluate(() => {
                         var errorDialog = document.querySelector("#popUpLayer2")
@@ -362,45 +259,23 @@ const escapeXPath = (value) => { return value.replace(/"/g, '\\"') }
 
 const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
     try {
-        if (countLines === 0) {
-            // await page.goto(process.env.HOSTPGOBTV1, { waitUntil: "networkidle2" });
+        if (countLines == 1) {
             await Promise.all([
-                page.waitForSelector("#menuPrincipal > div.col1 > div.button.menu.menuSelecionado", { visible: true }),
-                page.click("#menuPrincipal > div.col1 > div.button.menu.menuSelecionado"),
-                page.waitForSelector("#contentMenu > div:nth-child(3) > ul > li:nth-child(6) > a", { visible: true }),
-                page.click("#contentMenu > div:nth-child(3) > ul > li:nth-child(6) > a")
+                await page.goto(process.env.HOSTPGOBTV1, { waitUntil: "networkidle2" })
             ]);
-            await page.waitForSelector("#consultarNumeroConvenio", { visible: true });
-            await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`);
-            await page.waitForSelector("#form_submit", { visible: true });
-            await Promise.all([
-                page.click("#form_submit"),
-                page.waitForNavigation({ waitUntil: "networkidle2" })
-            ]);
-            await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true });
-            await Promise.all([
-                page.click("#tbodyrow > tr > td > div > a"),
-                page.waitForNavigation({ waitUntil: "networkidle2" })
-            ]);
-            await page.waitForSelector("input[value='Novo Pagamento']", { visible: true });
-            await Promise.all([
-                await page.click("input[value='Novo Pagamento']"),
-                page.waitForNavigation({ waitUntil: "networkidle2" })
-            ]);
+            await preencherCampo(page, "type", "#consultarNumeroConvenio", item["CONVENIO"], false);
+            await clicarEAguardar(page, true, "#form_submit");
+            await clicarEAguardar(page, true, "#tbodyrow > tr > td > div > a");
+            await clicarEAguardar(page, true, "input[value='Novo Pagamento']");
         } else {
             await page.goto(process.env.HOSTPGOBTV2, { waitUntil: "networkidle2" });
-            await page.waitForSelector("input[value='Novo Pagamento']", { visible: true });
-            await Promise.all([
-                await page.click("input[value='Novo Pagamento']"),
-                page.waitForNavigation({ waitUntil: "networkidle2" })
-            ]);
+            await clicarEAguardar(page, true, "input[value='Novo Pagamento']");
         }
 
-        // let [opcaoEncontrada] = await page.$x(`//option[contains(., "${item["Matricula"]}")]`);
         let [opcaoEncontrada] = await page.$x(`//option[contains(., "${escapeXPath(item["Matricula"])}")]`);
         if (opcaoEncontrada) {
             let optValue = await (await opcaoEncontrada.getProperty("value")).jsonValue();
-            await page.select(`#formEditarPagamentoOBTV\\:manterPagamentoOBTVControleNotaFiscalCombo`, optValue)
+            await preencherCampo(page, "type", "#formEditarPagamentoOBTV\\:manterPagamentoOBTVControleNotaFiscalCombo", optValue, true);
             const loaded = await page.waitForFunction(() => {
                 const carregando = document.querySelector(".carregando")
                 return !carregando || carregando.style.display === "none"
@@ -418,8 +293,7 @@ const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
                     }, { timeout: process.env.TIMEOUT })
                 ]);
 
-                await page.waitForSelector("#textoObservacaoPagamento", { visible: true });
-                await page.type("#textoObservacaoPagamento", `PGTO ${DESCRICAO_ITEM}`);
+                await preencherCampo(page, "type", "#textoObservacaoPagamento", `PGTO ${DESCRICAO_ITEM}`, false);
 
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -433,8 +307,10 @@ const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
                     })
                 ])
 
-                await page.waitForSelector("input[value='Concluir Pagamento']", { visible: true })
-                await Promise.all([page.click("input[value='Concluir Pagamento']"), page.waitForNavigation({ waitUntil: "networkidle2", visible: true })]);
+                await clicarEAguardar(page, true, "input[value='Concluir Pagamento']");
+
+                // await page.waitForSelector("input[value='Concluir Pagamento']", { visible: true })
+                // await Promise.all([page.click("input[value='Concluir Pagamento']"), page.waitForNavigation({ waitUntil: "networkidle2", visible: true })]);
 
                 const [hasError, errorMsg] = await page.evaluate(() => {
                     var errorDialog = document.querySelector("#popUpLayer2")

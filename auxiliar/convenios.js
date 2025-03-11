@@ -21,4 +21,9 @@ var convenios = [
     },
 ]
 
+/*
+CPF: 077.948.888-16
+SENHA: S1efg67r###
+*/
+
 module.exports = convenios

@@ -81,32 +81,35 @@ const startDebug = async () => {
     return { status, browser, page };
 };
 
+const clicarEAguardar = async (page, wait, seletor) => {
+    await page.waitForSelector(seletor, { visible: true });
+    await Promise.all([
+        page.click(seletor),
+        wait ? page.waitForNavigation({ waitUntil: "networkidle2" }) : true
+    ]);
+}
+
+const preencherCampo = async (page, type, seletor, valor, timeout) => {
+    await page.waitForSelector(seletor, { visible: true });
+    await page.click(seletor);
+    type == "type" ? await page.type(seletor, valor, { delay: 1 }) : await page.select(seletor, valor)
+    timeout ? await page.waitForTimeout(1000) : true
+}
+
 const acessarHome = async () => {
     try {
         var status = false
         await page.goto("https://idp.plataformamaisbrasil.gov.br", { waitUntil: "networkidle2" });
-        await page.waitForSelector("#form_submit_login", { visible: true })
-        await page.click("#form_submit_login")
 
-        await delay(10000)
-        // if (await page.waitForSelector("#login-certificate", { visible: true })) {
-        //     await page.waitForSelector("#login-certificate", { visible: true })
-        //     await page.click("#login-certificate")
-        //     if (await page.waitForSelector("#header #logo", { visible: true })) {
-        status = true
-        //     } else {
-        //         status = false
-        //     }
-        // } else {
-        //     await page.waitForSelector("#accountId", { visible: true })
-        //     await page.type("#accountId", process.env.USER, { delay: 100 })
-        //     await page.keyboard.press("Enter")
-        //     await page.waitForNavigation()
-        //     await page.type("#password", process.env.PASSWORD)
-        //     await page.keyboard.press("Enter")
-        //     await page.waitForNavigation()
-        //     status = true
-        // }
+        await clicarEAguardar(page, "true", "#form_submit_login")
+        // await preencherCampo(page, "type", "#accountId", process.env.login, false)
+        // await clicarEAguardar(page, "true", "#enter-account-id")
+        // await preencherCampo(page, "type", "#password", process.env.password, false)
+
+        await page.waitForFunction(
+            () => window.location.href.includes("Principal.do"), { timeout: 120000 }
+        );
+        status = true;
     } catch (error) {
         writeLog(logName, `Não foi possível efetuar o login!`);
         console.log("Não foi possível efetuar o login!", error)
