@@ -55,9 +55,14 @@ const anexarHolerite = async (item, page, anexoPath, anexo, ref) => {
         await inputUploadHandle.uploadFile(`${anexoPath}\\${ref}.PDF`)
         await clicarEAguardar(page, true, "#form_submit");
     } else {
-        await clicarEAguardar(page, true, "#tr-salvarNaoDigitalizar input[value='1']");
-        await page.$("#salvarJustificativa");
-        await preencherCampo(page, "type", "#salvarJustificativa", "O contra-cheque não foi digitalizado devido a instabilidades e lentidão no portal, impedindo o envio do arquivo. Para evitar atrasos no pagamento, os lançamentos serão feitos sem o anexo, que será incluído posteriormente.", false)
+        // await clicarEAguardar(page, true, "#tr-salvarNaoDigitalizar input[value='1']");
+        // await page.$("#salvarJustificativa");
+        // await preencherCampo(page, "type", "#salvarJustificativa", "O contra-cheque não foi digitalizado devido a instabilidades e lentidão no portal, impedindo o envio do arquivo. Para evitar atrasos no pagamento, os lançamentos serão feitos sem o anexo, que será incluído posteriormente.", false)
+        await page.waitForSelector("#tr-salvarNaoDigitalizar input[value='1']", { visible: true })
+        await page.click("#tr-salvarNaoDigitalizar input[value='1']", { clickCount: 1 })
+        await page.waitForSelector("#salvarJustificativa", { visible: true })
+        const salvarJustificativa = await page.$("#salvarJustificativa");
+        await page.type("#salvarJustificativa", "O contra-cheque não foi digitalizado devido a instabilidades e lentidão no portal, impedindo o envio do arquivo. Para evitar atrasos no pagamento, os lançamentos serão feitos sem o anexo, que será incluído posteriormente.")
     }
 }
 
@@ -155,7 +160,7 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
             await clicarEAguardar(page, true, "#tbodyrow > tr > td > div > a")
 
             await page.goto(process.env.HOSTRETORNO2)
-            
+
             await clicarEAguardar(page, true, "input[value='Incluir Documento de Liquidação']")
         }
         if (item["CPF"].length == 11) {
@@ -202,7 +207,7 @@ const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anex
 
                     let isDialogHandled = false;
 
-                    await new Promise(resolve => setTimeout(resolve, 10000000));
+                    // await new Promise(resolve => setTimeout(resolve, 10000000));
 
                     await Promise.all([
                         await page.on("dialog", async dialog => {
@@ -275,7 +280,7 @@ const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
         let [opcaoEncontrada] = await page.$x(`//option[contains(., "${escapeXPath(item["Matricula"])}")]`);
         if (opcaoEncontrada) {
             let optValue = await (await opcaoEncontrada.getProperty("value")).jsonValue();
-            await preencherCampo(page, "type", "#formEditarPagamentoOBTV\\:manterPagamentoOBTVControleNotaFiscalCombo", optValue, true);
+            await preencherCampo(page, "select", "#formEditarPagamentoOBTV\\:manterPagamentoOBTVControleNotaFiscalCombo", optValue, true);
             const loaded = await page.waitForFunction(() => {
                 const carregando = document.querySelector(".carregando")
                 return !carregando || carregando.style.display === "none"
