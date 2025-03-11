@@ -7228,7 +7228,7 @@ const dadosBancarios = [
     "BANCO": "001",
     "AGENCIA": "3317",
     "CONTA": "13886",
-    "DIGITO": "0"
+    "DIGITO": "X"
   },
   {
     "CPF": "71521399204",
@@ -7976,8 +7976,8 @@ const dadosBancarios = [
     "CPF": "83262970204",
     "BANCO": "104",
     "AGENCIA": "4542",
-    "CONTA": "778208636",
-    "DIGITO": "2"
+    "CONTA": "780317957",
+    "DIGITO": "7"
   },
   {
     "CPF": "03415366286",
