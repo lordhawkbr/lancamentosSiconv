@@ -3,7 +3,6 @@ const path = require("path");
 
 const writeLog = async (arquivo, texto) => {
     try {
-        arquivo = arquivo.replace(":","_")
         if (!texto.includes("Session closed") && !texto.includes("Target closed")) {
             var filePath = path.join(`./log`, `${arquivo}.txt`)
             var appendOptions = {};

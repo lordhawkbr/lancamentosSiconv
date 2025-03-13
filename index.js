@@ -11,8 +11,10 @@ const main = require("./funcs/main")
 const { spawn } = require("child_process");
 const { performance } = require("perf_hooks");
 
+const logData = new Date().toISOString().split('T')[0]
+
 let browser, page
-var arquivo = main.logName
+let arquivo = `${logData}`
 
 const holeritesPath = path.join(__dirname, "arquivos", "holerites")
 const txtPath = path.join(__dirname, "arquivos", "txt")
@@ -141,6 +143,7 @@ const automacaoViaArquivo = async (filePath, opcao) => {
         return;
     }
 
+    // arquivo = `geral_${new Date()}_${fileData[0]["CONVENIO"]}`
 
     for (var item of fileData) {
         const start = performance.now();
@@ -237,6 +240,7 @@ const start = async () => {
         let opcao = parseInt(op)
         if (opcao != 0) {
             await iniciarManual(opcao)
+            // writeLog(arquivo, "Texto")
         }
         rl.close()
     })

@@ -1,10 +1,8 @@
 const puppeteer = require("puppeteer");
 const delay = require("delay");
 const { execSync, spawn } = require("child_process");
-const writeLog = require("./writeLog");
-let browser, page
-var logName = `geral_${new Date().toISOString()}`
 
+let browser, page
 process.on("SIGINT", async () => {
     console.log("\nInterrompido pelo usuário (Ctrl+C).");
     await closeBrowser();
@@ -74,7 +72,8 @@ const startDebug = async () => {
     } catch (error) {
         console.error("Erro ao iniciar o navegador ou conectar ao Puppeteer:", error.message);
         await closeBrowser();
-        writeLog(logName, `Não foi possível iniciar o navegador!`);
+    
+        
         status = false;
     }
 
@@ -111,7 +110,6 @@ const acessarHome = async () => {
         );
         status = true;
     } catch (error) {
-        writeLog(logName, `Não foi possível efetuar o login!`);
         console.log("Não foi possível efetuar o login!", error)
         status = false
         await closeBrowser()
@@ -124,6 +122,5 @@ module.exports = {
     page,
     closeBrowser,
     startDebug,
-    acessarHome,
-    logName
+    acessarHome
 }

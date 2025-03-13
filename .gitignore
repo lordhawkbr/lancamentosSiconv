@@ -1,4 +1,4 @@
 node_modules
-log/*
-arquivos
+log
+arquivos/
 auxiliar/*.csv
