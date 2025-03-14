@@ -4203,8 +4203,8 @@ const dadosBancarios = [
     "CPF": "71083967266",
     "BANCO": "104",
     "AGENCIA": "3707",
-    "CONTA": "24752",
-    "DIGITO": "2"
+    "CONTA": "10024752",
+    "DIGITO": "9"
   },
   {
     "CPF": "32270550234",
@@ -4217,7 +4217,7 @@ const dadosBancarios = [
     "CPF": "80226213234",
     "BANCO": "104",
     "AGENCIA": "3339",
-    "CONTA": "00022862",
+    "CONTA": "10022862",
     "DIGITO": "1"
   },
   {
@@ -4497,8 +4497,8 @@ const dadosBancarios = [
     "CPF": "00711868247",
     "BANCO": "104",
     "AGENCIA": "3707",
-    "CONTA": "5998836347",
-    "DIGITO": "X"
+    "CONTA": "599883634",
+    "DIGITO": "7"
   },
   {
     "CPF": "00735562202",
@@ -4720,8 +4720,8 @@ const dadosBancarios = [
   {
     "CPF": "02110340290",
     "BANCO": "104",
-    "AGENCIA": "3707",
-    "CONTA": "13474",
+    "AGENCIA": "3704",
+    "CONTA": "130013474",
     "DIGITO": "4"
   },
   {
@@ -4874,9 +4874,9 @@ const dadosBancarios = [
   {
     "CPF": "06252086258",
     "BANCO": "104",
-    "AGENCIA": "0803",
-    "CONTA": "858604753",
-    "DIGITO": "6"
+    "AGENCIA": "0234",
+    "CONTA": "125234",
+    "DIGITO": "8"
   },
   {
     "CPF": "02240685204",
@@ -4903,7 +4903,7 @@ const dadosBancarios = [
     "CPF": "06127820260",
     "BANCO": "104",
     "AGENCIA": "3707",
-    "CONTA": "10968",
+    "CONTA": "130010968",
     "DIGITO": "5"
   },
   {
@@ -5099,7 +5099,7 @@ const dadosBancarios = [
     "CPF": "69497745249",
     "BANCO": "104",
     "AGENCIA": "3339",
-    "CONTA": "22763",
+    "CONTA": "130022763",
     "DIGITO": "7"
   },
   {
@@ -5587,7 +5587,7 @@ const dadosBancarios = [
   },
   {
     "CPF": "00851759270",
-    "BANCO": "234",
+    "BANCO": "001",
     "AGENCIA": "0234",
     "CONTA": "33452",
     "DIGITO": "9"
@@ -6093,7 +6093,7 @@ const dadosBancarios = [
     "CPF": "46537937272",
     "BANCO": "104",
     "AGENCIA": "0803",
-    "CONTA": "34967",
+    "CONTA": "10034967",
     "DIGITO": "8"
   },
   {
@@ -6141,9 +6141,9 @@ const dadosBancarios = [
   {
     "CPF": "64563316253",
     "BANCO": "104",
-    "AGENCIA": "7939",
-    "CONTA": "719746618",
-    "DIGITO": "1"
+    "AGENCIA": "0803",
+    "CONTA": "874333145",
+    "DIGITO": "7"
   },
   {
     "CPF": "01305473280",
