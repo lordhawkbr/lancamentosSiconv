@@ -343,7 +343,73 @@ const pagamentoOBTV = async (item, DESCRICAO_ITEM, countLines, page) => {
     }
 }
 
+const deletarDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, totalItens) => {
+    try {
+        if (countLines == 1) {
+            await page.goto(process.env.HOSTINICIO)
+            await Promise.all([
+                page.waitForNavigation({ waitUntil: ["load", "networkidle2"] }),
+                await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
+                await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`), { delay: 10 },
+                await page.waitForSelector("#form_submit", { visible: true }),
+                await page.click("#form_submit")
+            ]);
+            await Promise.all([
+                page.waitForNavigation({ waitUntil: ["load", "networkidle2"] }),
+                await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true }),
+                await page.click("#tbodyrow > tr > td > div > a"),
+            ]);
+        }
+        await page.goto(process.env.HOSTRETORNO2)
+        await Promise.all([
+            page.waitForNavigation({ waitUntil: ["load", "networkidle2"] }),
+            await page.waitForSelector("#consultarNumero", { visible: true }),
+            await page.type("#consultarNumero", `${DESCRICAO_ITEM}`), { delay: 10 },
+            await page.waitForSelector("#form_submit", { visible: true }),
+            await page.click("#form_submit")
+        ]);
+
+        await page.waitForSelector("#tbodyrow tr", { visible: true });
+        const registrosDuplicados = await page.evaluate(() => { return Array.from(document.querySelectorAll("#tbodyrow tr")).length; });
+        if (registrosDuplicados >= 1) {
+            await clicarEAguardar(page, true, "#tbodyrow > tr:nth-child(1) > td:nth-child(2) > a");
+
+            let isDialogHandled = false;
+            await Promise.all([
+                await page.on("dialog", async dialog => {
+                    if (!isDialogHandled) {
+                        isDialogHandled = true;
+                        await dialog.accept();
+                    }
+                })
+            ])
+
+            await clicarEAguardar(page, true, "input[value='Excluir Doc. de Liquidação']");
+
+            const hasError = await page.evaluate(() => { return document.querySelector("#popUpLayer2") !== null; });
+            if (hasError) {
+                writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: erro ao deletar item!`)
+                console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: erro ao deletar item!`)
+                return false;
+            } else {
+                writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: item excluido!`)
+                console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: item excluido!`)
+                return true
+            }
+        } else {
+            writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: Nenhum item encontrado para deletar!`)
+            console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: Nenhum item encontrado para deletar!`);
+            return false;
+        }
+    } catch (error) {
+        console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar delete de documento: ${error} `)
+        writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar delete de documento: ${error} `);
+        return false;
+    }
+};
+
 module.exports = {
     incluirDocLiquidacao,
-    pagamentoOBTV
+    pagamentoOBTV,
+    deletarDocLiquidacao
 }

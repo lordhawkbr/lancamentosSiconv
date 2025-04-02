@@ -4144,7 +4144,7 @@ const dadosBancarios = [
     "DIGITO": "3"
   },
   {
-    "CPF": "330813875234",
+    "CPF": "30813875234",
     "BANCO": "001",
     "AGENCIA": "2713",
     "CONTA": "17418",
@@ -4203,7 +4203,7 @@ const dadosBancarios = [
     "CPF": "71083967266",
     "BANCO": "104",
     "AGENCIA": "3707",
-    "CONTA": "10024752",
+    "CONTA": "100024752",
     "DIGITO": "9"
   },
   {
@@ -4720,7 +4720,7 @@ const dadosBancarios = [
   {
     "CPF": "02110340290",
     "BANCO": "104",
-    "AGENCIA": "3704",
+    "AGENCIA": "3707",
     "CONTA": "130013474",
     "DIGITO": "4"
   },
@@ -5937,7 +5937,7 @@ const dadosBancarios = [
   },
   {
     "CPF": "83095055234",
-    "BANCO": "234",
+    "BANCO": "001",
     "AGENCIA": "0234",
     "CONTA": "40635",
     "DIGITO": "X"
@@ -6093,7 +6093,7 @@ const dadosBancarios = [
     "CPF": "46537937272",
     "BANCO": "104",
     "AGENCIA": "0803",
-    "CONTA": "10034967",
+    "CONTA": "100034967",
     "DIGITO": "8"
   },
   {
@@ -6357,7 +6357,7 @@ const dadosBancarios = [
   },
   {
     "CPF": "01426719248",
-    "BANCO": "234",
+    "BANCO": "001",
     "AGENCIA": "4519",
     "CONTA": "17733",
     "DIGITO": "4"
@@ -8943,7 +8943,7 @@ const dadosBancarios = [
     "BANCO": "104",
     "AGENCIA": "3320",
     "CONTA": "599169026",
-    "DIGITO": "56"
+    "DIGITO": "6"
   },
   {
     "CPF": "02704024200",
@@ -9018,7 +9018,7 @@ const dadosBancarios = [
   {
     "CPF": "59477610259",
     "BANCO": "001",
-    "AGENCIA": "8141",
+    "AGENCIA": "0814",
     "CONTA": "22329",
     "DIGITO": "8"
   },
@@ -9046,7 +9046,7 @@ const dadosBancarios = [
   {
     "CPF": "04762811211",
     "BANCO": "001",
-    "AGENCIA": "8141",
+    "AGENCIA": "0814",
     "CONTA": "22320",
     "DIGITO": "4"
   },
@@ -9130,9 +9130,64 @@ const dadosBancarios = [
   {
     "CPF": "85864293253",
     "BANCO": "001",
-    "AGENCIA": "8141",
+    "AGENCIA": "0814",
     "CONTA": "22323",
     "DIGITO": "9"
+  }, {
+    "CPF": "96097620268",
+    "BANCO": "001",
+    "AGENCIA": "3022",
+    "CONTA": "122555",
+    "DIGITO": "3"
+  },
+  {
+    "CPF": "93634137215",
+    "BANCO": "",
+    "AGENCIA": "",
+    "CONTA": "",
+    "DIGITO": ""
+  },
+  {
+    "CPF": "89884140120",
+    "BANCO": "",
+    "AGENCIA": "",
+    "CONTA": "",
+    "DIGITO": ""
+  },
+  {
+    "CPF": "66687853287",
+    "BANCO": "",
+    "AGENCIA": "",
+    "CONTA": "",
+    "DIGITO": ""
+  },
+  {
+    "CPF": "60458321249",
+    "BANCO": "",
+    "AGENCIA": "",
+    "CONTA": "",
+    "DIGITO": ""
+  },
+  {
+    "CPF": "03981423275",
+    "BANCO": "",
+    "AGENCIA": "",
+    "CONTA": "",
+    "DIGITO": ""
+  },
+  {
+    "CPF": "01792359233",
+    "BANCO": "001",
+    "AGENCIA": "3022",
+    "CONTA": "44817",
+    "DIGITO": "6"
+  },
+  {
+    "CPF": "01095398261",
+    "BANCO": "237",
+    "AGENCIA": "0427",
+    "CONTA": "0211538",
+    "DIGITO": "7"
   }
 ]
 

@@ -6,6 +6,7 @@ output_file = "ARQUIVO_PARCIAL.csv"
 
 # Lista de matrículas a remover
 matriculas = [
+    "400337","400020","400035","400372","400176","400326","400006","400229","400257","400029","400051","400256"
 ]
 
 # Ler CSV ignorando linhas com erro de colunas

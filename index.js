@@ -6,7 +6,7 @@ const readline = require("readline")
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const writeLog = require("./funcs/writeLog")
 require("dotenv/config")
-const { incluirDocLiquidacao, pagamentoOBTV } = require("./funcs/automacao")
+const { incluirDocLiquidacao, pagamentoOBTV, deletarDocLiquidacao } = require("./funcs/automacao")
 const main = require("./funcs/main")
 const { spawn } = require("child_process");
 const { performance } = require("perf_hooks");
@@ -159,6 +159,9 @@ const automacaoViaArquivo = async (filePath, opcao) => {
                 case 3:
                     leituraItem = await pagamentoOBTV(item, DESCRICAO_ITEM, index, page, fileData.length);
                     break;
+                case 4:
+                    leituraItem = await deletarDocLiquidacao(item, DESCRICAO_ITEM, index, page, fileData.length);
+                    break;
                 default:
                     console.error("Opção inválida:", opcao);
                     await main.closeBrowser();
@@ -234,6 +237,7 @@ const start = async () => {
     console.log("> 1) Incluir documento de liquidação (SEM ANEXO);")
     console.log("> 2) Incluir documento de liquidação (COM ANEXO);")
     console.log("> 3) Realizar pagamento OBTV;")
+    console.log("> 4) Deletar documento de liquidação;")
     console.log("> 0) Cancelar")
 
     rl.question("Digite a opção p/ iniciar: ", async (op) => {
