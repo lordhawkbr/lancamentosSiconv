@@ -394,22 +394,22 @@ const deletarDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, tota
 
             const hasError = await page.evaluate(() => { return document.querySelector("#popUpLayer2") !== null; });
             if (hasError) {
-                writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: erro ao deletar item!`)
-                console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: erro ao deletar item!`)
+                writeLog(logName, `${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: erro ao deletar item!`)
+                console.log(`${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: erro ao deletar item!`)
                 return false;
             } else {
-                writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: item excluido!`)
-                console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: item excluido!`)
+                writeLog(logName, `${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: item excluido!`)
+                console.log(`${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: item excluido!`)
                 return true
             }
         } else {
-            writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: Nenhum item encontrado para deletar!`)
-            console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: Nenhum item encontrado para deletar!`);
+            writeLog(logName, `${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: Nenhum item encontrado para deletar!`)
+            console.log(`${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: Nenhum item encontrado para deletar!`);
             return false;
         }
     } catch (error) {
-        console.log(`${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar delete de documento: ${error} `)
-        writeLog(logName, `${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar delete de documento: ${error} `);
+        console.log(`${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar delete de documento: ${error} `)
+        writeLog(logName, `${countLines}/${totalItens} => ${DESCRICAO_ITEM}-${item["CPF"]}: erro ao iniciar delete de documento: ${error} `);
         return false;
     }
 };
