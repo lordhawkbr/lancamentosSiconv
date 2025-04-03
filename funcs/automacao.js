@@ -149,6 +149,7 @@ const preencherCampo = async (page, type, seletor, valor, timeout) => {
 const incluirDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, anexo, anexoPath, totalItens) => {
     const ADMINISTRATIVO = item["ADMINISTRATIVO"] == "S" ? "1" : "0"
     const [PROVENTOS, DESCONTOS, VALOR_LIQUIDO] = calcularValores(item)
+    console.log(item.TiposVerba.Provento.find(e => e["Descricao Verba"].includes("SALARIO")))
     const SALARIO = item.TiposVerba.Provento.find(e => e["Descricao Verba"].includes("SALARIO"))["Vlr. Lancam."]
 
     const [CHECKBOX_META, CHECKBOX_SERVICO, CHECKBOX_TRIBUTO] = CONVENIOS.find(e => e.convenio == item["CONVENIO"]).boxes

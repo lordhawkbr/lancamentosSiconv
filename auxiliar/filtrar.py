@@ -5,17 +5,15 @@ input_file = "ARQUIVO_TOTAL.csv"
 output_file = "ARQUIVO_PARCIAL.csv"
 
 # Lista de matrículas a remover
-matriculas = [
-    "400337","400020","400035","400372","400176","400326","400006","400229","400257","400029","400051","400256"
-]
+matriculas = []
 
 # Ler CSV ignorando linhas com erro de colunas
 df = pd.read_csv(input_file, sep=";", encoding="utf-8", dtype={"Matricula": str}, engine="python", on_bad_lines="skip")
 
 # Filtrar removendo matrículas indesejadas
-# df_filtrado = df[~df["Matricula"].isin(matriculas)]
+df_filtrado = df[~df["Matricula"].isin(matriculas)]
 #Filtrar e manter as matriculas desejadas
-df_filtrado = df[df["Matricula"].isin(matriculas)]
+# df_filtrado = df[df["Matricula"].isin(matriculas)]
 
 # Salvar novo arquivo
 df_filtrado.to_csv(output_file, sep=";", index=False, encoding="utf-8")
