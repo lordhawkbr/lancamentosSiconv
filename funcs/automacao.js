@@ -371,7 +371,9 @@ const deletarDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, tota
 
         await page.waitForSelector("#tbodyrow tr", { visible: true });
         const registrosDuplicados = await page.evaluate(() => { return Array.from(document.querySelectorAll("#tbodyrow tr")).length; });
-        if (registrosDuplicados >= 1) {
+
+        console.log(registrosDuplicados)
+        if (registrosDuplicados == 1) {
             await clicarEAguardar(page, true, "#tbodyrow > tr:nth-child(1) > td:nth-child(2) > a");
 
             let isDialogHandled = false;
