@@ -134,6 +134,12 @@ const clicarEAguardar = async (page, wait, seletor) => {
 }
 
 const preencherCampo = async (page, type, seletor, valor, timeout) => {
+    const campo = await page.$(seletor);
+    if (campo) {
+        await campo.click({ clickCount: 3 });
+        await page.keyboard.press("Backspace");
+    }
+
     await page.waitForSelector(seletor, { visible: true });
     await page.click(seletor);
     type == "type" ? await page.type(seletor, valor, { delay: 1 }) : await page.select(seletor, valor)
@@ -349,30 +355,28 @@ const deletarDocLiquidacao = async (item, DESCRICAO_ITEM, countLines, page, tota
             await page.goto(process.env.HOSTINICIO)
             await Promise.all([
                 page.waitForNavigation({ waitUntil: ["load", "networkidle2"] }),
-                await page.waitForSelector("#consultarNumeroConvenio", { visible: true }),
-                await page.type("#consultarNumeroConvenio", `${item["CONVENIO"]}`), { delay: 10 },
-                await page.waitForSelector("#form_submit", { visible: true }),
-                await page.click("#form_submit")
+                await preencherCampo(page, "type", "#consultarNumeroConvenio", `${item["CONVENIO"]}`, false),
+                await clicarEAguardar(page, true, "#form_submit")
             ]);
             await Promise.all([
                 page.waitForNavigation({ waitUntil: ["load", "networkidle2"] }),
-                await page.waitForSelector("#tbodyrow > tr > td > div > a", { visible: true }),
-                await page.click("#tbodyrow > tr > td > div > a"),
+                await clicarEAguardar(page, true, "#tbodyrow > tr > td > div > a")
             ]);
         }
         await page.goto(process.env.HOSTRETORNO2)
         await Promise.all([
             page.waitForNavigation({ waitUntil: ["load", "networkidle2"] }),
-            await page.waitForSelector("#consultarNumero", { visible: true }),
-            await page.type("#consultarNumero", `${DESCRICAO_ITEM}`), { delay: 10 },
-            await page.waitForSelector("#form_submit", { visible: true }),
-            await page.click("#form_submit")
+            await preencherCampo(page, "type", "#consultarNumero", `${DESCRICAO_ITEM}`, false),
+            await clicarEAguardar(page, true, "#form_submit")
         ]);
+        // VERIFICANDO SE A TABELA EXISTE, SE NAO ESTA VAZIA E SE POSSUI ALGUMA LINHA
+        const tabelaExiste = await page.$("#notasFiscais") !== null;
+        if (!tabelaExiste) { return false; }
+        await page.waitForSelector("#notasFiscais", { visible: true, timeout: 5000 });
+        const registrosDuplicados = await page.evaluate(() => { return document.querySelectorAll("#notasFiscais tr.odd").length; });
+        if (registrosDuplicados === 0) return false;
+        // await new Promise(resolve => setTimeout(resolve, 10000000));
 
-        await page.waitForSelector("#tbodyrow tr", { visible: true });
-        const registrosDuplicados = await page.evaluate(() => { return Array.from(document.querySelectorAll("#tbodyrow tr")).length; });
-
-        console.log(registrosDuplicados)
         if (registrosDuplicados == 1) {
             await clicarEAguardar(page, true, "#tbodyrow > tr:nth-child(1) > td:nth-child(2) > a");
 
